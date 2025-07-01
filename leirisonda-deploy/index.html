@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, minimal-ui"
+    />
+
+    <!-- PWA Meta Tags - Force iOS app behavior -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="Leirisonda" />
+    <meta name="application-name" content="Leirisonda" />
+    <meta name="theme-color" content="#b30229" />
+    <meta name="msapplication-TileColor" content="#b30229" />
+    <meta name="msapplication-navbutton-color" content="#b30229" />
+    <meta
+      name="description"
+      content="Sistema de gestão de obras e manutenção de piscinas da Leirisonda"
+    />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-touch-fullscreen" content="yes" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+
+    <!-- PWA Manifest -->
+    <link
+      rel="manifest"
+      href="/manifest.json?v=2.0.1"
+      crossorigin="use-credentials"
+    />
+
+    <!-- Apple Touch Icons otimizados para iPhone com novo logo -->
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="https://cdn.builder.io/api/v1/image/assets%2F24b5ff5dbb9f4bb493659e90291d92bc%2F4bab7908433647cf893ac37d2e1a2962?format=png&width=180"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="152x152"
+      href="https://cdn.builder.io/api/v1/image/assets%2F24b5ff5dbb9f4bb493659e90291d92bc%2F4bab7908433647cf893ac37d2e1a2962?format=png&width=152"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="120x120"
+      href="https://cdn.builder.io/api/v1/image/assets%2F24b5ff5dbb9f4bb493659e90291d92bc%2F4bab7908433647cf893ac37d2e1a2962?format=png&width=120"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="76x76"
+      href="https://cdn.builder.io/api/v1/image/assets%2F24b5ff5dbb9f4bb493659e90291d92bc%2F4bab7908433647cf893ac37d2e1a2962?format=png&width=76"
+    />
+
+    <!-- Ícone principal para iPhone com novo logotipo -->
+    <link
+      rel="apple-touch-icon"
+      href="https://cdn.builder.io/api/v1/image/assets%2F24b5ff5dbb9f4bb493659e90291d92bc%2F4bab7908433647cf893ac37d2e1a2962?format=png&width=180"
+    />
+
+    <!-- Favicon e ícones adicionais com logo da Leirisonda -->
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="icon" type="image/svg+xml" href="/favicon-leirisonda.svg" />
+    <link rel="shortcut icon" href="/favicon-leirisonda.svg" />
+
+    <!-- PWA Styles -->
+    <link rel="stylesheet" href="/pwa-style.css" />
+
+    <title>Leirisonda - Gestão de Obras</title>
+    <script type="module" crossorigin src="/assets/index-DnEsHg1H.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DFdR-byQ.css">
+  </head>
+
+  <body>
+    <div id="root"></div>
+
+
+    <!-- PWA Service Worker -->
+    <script>
+      let deferredPrompt;
+
+      // Debug PWA status
+      console.log("PWA Debug - HTTPS:", location.protocol === "https:");
+      console.log(
+        "PWA Debug - Service Worker support:",
+        "serviceWorker" in navigator,
+      );
+      console.log("PWA Debug - Standalone mode:", window.navigator.standalone);
+      console.log(
+        "PWA Debug - Display mode:",
+        window.matchMedia("(display-mode: standalone)").matches,
+      );
+
+      // Force standalone behavior on iOS
+      if (window.navigator.standalone === false) {
+        console.log("⚠️ App opened in browser instead of standalone mode");
+      } else if (window.navigator.standalone === true) {
+        console.log("✅ App running in standalone mode");
+      }
+
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function () {
+          navigator.serviceWorker
+            .register("/sw.js")
+            .then(function (registration) {
+              console.log("✅ Leirisonda SW registered:", registration.scope);
+            })
+            .catch(function (error) {
+              console.log("❌ Leirisonda SW registration failed:", error);
+            });
+        });
+      }
+
+      // PWA Install prompt
+      window.addEventListener("beforeinstallprompt", (e) => {
+        console.log("🎉 PWA install prompt available");
+        e.preventDefault();
+        deferredPrompt = e;
+
+        // Show install notification
+        const notification = document.createElement("div");
+        notification.style.cssText = `
+          position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+          background: #007784; color: white; padding: 12px 20px;
+          border-radius: 8px; z-index: 10000; font-family: sans-serif;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        `;
+        notification.innerHTML =
+          '📱 Instalar Leirisonda como app? <button onclick="installPWA()" style="margin-left:10px;background:white;color:#007784;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;">Instalar</button>';
+        document.body.appendChild(notification);
+
+        setTimeout(() => notification.remove(), 10000);
+      });
+
+      function installPWA() {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then((choiceResult) => {
+            console.log("User choice:", choiceResult.outcome);
+            deferredPrompt = null;
+          });
+        }
+      }
+
+      window.installPWA = installPWA;
+    </script>
+  </body>
+</html>

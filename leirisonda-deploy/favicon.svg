@@ -1,0 +1,24 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fundo com cores da Leirisonda -->
+  <rect width="32" height="32" rx="7" fill="#b30229"/>
+  
+  <!-- Logo simplificado da Leirisonda -->
+  <circle cx="16" cy="16" r="12" fill="#007784"/>
+  
+  <!-- Símbolo de construção/obra */
+  <rect x="10" y="13" width="12" height="1.5" fill="white"/>
+  <rect x="10" y="16" width="12" height="1.5" fill="white"/>
+  <rect x="10" y="19" width="12" height="1.5" fill="white"/>
+  
+  <!-- Ferramenta/chave */
+  <rect x="13" y="8" width="2" height="6" fill="white"/>
+  <rect x="17" y="8" width="2" height="6" fill="white"/>
+  
+  <!-- Base/fundação */
+  <rect x="8" y="23" width="16" height="3" fill="white" rx="1"/>
+  
+  <!-- Detalhes decorativos */
+  <circle cx="11" cy="11" r="1" fill="white" opacity="0.8"/>
+  <circle cx="21" cy="11" r="1" fill="white" opacity="0.8"/>
+  <circle cx="16" cy="6" r="0.7" fill="white" opacity="0.6"/>
+</svg>
