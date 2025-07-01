@@ -1,0 +1,25 @@
+{
+  "webhook": {
+    "url": "https://api.github.com/repos/GoncaloFonseca86/Builder-stellar-landing/dispatches",
+    "events": ["content.publish", "content.update"],
+    "headers": {
+      "Authorization": "Bearer ${GITHUB_TOKEN}",
+      "Accept": "application/vnd.github.v3+json",
+      "Content-Type": "application/json"
+    },
+    "payload": {
+      "event_type": "builder-io-sync",
+      "client_payload": {
+        "source": "builder-io",
+        "timestamp": "${timestamp}",
+        "action": "${action}"
+      }
+    }
+  },
+  "config": {
+    "auto_sync": true,
+    "branches": ["main", "ai_main_92a33b97ea03"],
+    "build_command": "npm run build",
+    "output_directory": "dist/spa"
+  }
+}

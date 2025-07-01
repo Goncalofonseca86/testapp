@@ -1,0 +1,20 @@
+{
+  "apiKey": "24b5ff5dbb9f4bb493659e90291d92bc",
+  "spaceId": "24b5ff5dbb9f4bb493659e90291d92bc",
+  "githubToken": "${GITHUB_TOKEN}",
+  "repository": {
+    "owner": "GoncaloFonseca86",
+    "name": "Builder-stellar-landing",
+    "branch": "ai_main_92a33b97ea03"
+  },
+  "forcePush": true,
+  "autoSync": true,
+  "buildOnPush": true,
+  "deployOnBuild": true,
+  "leirisondaApp": {
+    "version": "1.0.0",
+    "commits": 91,
+    "status": "READY_FOR_PRODUCTION",
+    "forceSyncNow": true
+  }
+}
