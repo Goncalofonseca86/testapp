@@ -1,0 +1,37 @@
+{
+  "github_integration": {
+    "repository": "GoncaloFonseca86/Builder-stellar-landing",
+    "default_branch": "main",
+    "sync_branches": ["main", "ai_main_92a33b97ea03"],
+    "auto_push": true,
+    "auto_deploy": true,
+    "build_settings": {
+      "build_command": "npm run build",
+      "output_directory": "dist/spa",
+      "node_version": "18"
+    },
+    "permissions": {
+      "read": true,
+      "write": true,
+      "admin": false
+    }
+  },
+  "webhooks": {
+    "enabled": true,
+    "events": ["push", "content_update"],
+    "target_url": "https://api.github.com/repos/GoncaloFonseca86/Builder-stellar-landing/dispatches"
+  },
+  "deployment": {
+    "netlify": {
+      "enabled": true,
+      "auto_deploy": true,
+      "build_hook": true
+    }
+  },
+  "troubleshooting": {
+    "last_sync": null,
+    "last_error": null,
+    "token_status": "unknown",
+    "permissions_verified": false
+  }
+}

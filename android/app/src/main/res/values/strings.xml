@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Leirisonda - Gestão de Obras</string>
+    <string name="title_activity_main">Leirisonda - Gestão de Obras</string>
+    <string name="package_name">com.leirisonda.obras</string>
+    <string name="custom_url_scheme">com.leirisonda.obras</string>
+</resources>
