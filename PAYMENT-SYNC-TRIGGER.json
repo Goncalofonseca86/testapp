@@ -1,0 +1,20 @@
+{
+  "builderIo": {
+    "paymentStatus": "UPDATED",
+    "planUpgraded": true,
+    "githubSyncEnabled": true,
+    "forceSync": true
+  },
+  "application": {
+    "name": "Leirisonda",
+    "status": "PRODUCTION_READY",
+    "commitsReady": 100,
+    "buildStatus": "SUCCESS"
+  },
+  "deployment": {
+    "urgent": true,
+    "forcePush": true,
+    "timestamp": "2024-06-28T12:00:00Z",
+    "action": "DEPLOY_NOW"
+  }
+}

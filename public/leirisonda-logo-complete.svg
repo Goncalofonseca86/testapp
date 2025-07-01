@@ -1,0 +1,26 @@
+<svg width="200" height="80" viewBox="0 0 200 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Logo Background -->
+  <rect width="60" height="60" x="10" y="10" rx="12" fill="#b30229"/>
+  
+  <!-- Main Circle -->
+  <circle cx="40" cy="40" r="20" fill="#007784"/>
+  
+  <!-- Stylized "L" -->
+  <rect x="32" y="28" width="4" height="24" fill="white" rx="1.5"/>
+  <rect x="32" y="48" width="12" height="4" fill="white" rx="1.5"/>
+  
+  <!-- Construction elements -->
+  <rect x="38" y="32" width="8" height="2" fill="white" opacity="0.9" rx="1"/>
+  <rect x="38" y="36" width="8" height="2" fill="white" opacity="0.7" rx="1"/>
+  <rect x="38" y="40" width="8" height="2" fill="white" opacity="0.5" rx="1"/>
+  
+  <!-- Text "LEIRISONDA" -->
+  <text x="80" y="35" font-family="Arial, sans-serif" font-weight="bold" font-size="16" fill="#b30229">
+    LEIRISONDA
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="80" y="52" font-family="Arial, sans-serif" font-weight="normal" font-size="10" fill="#007784">
+    Construção e Obras
+  </text>
+</svg>
