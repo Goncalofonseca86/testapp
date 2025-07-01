@@ -1,0 +1,674 @@
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700;800&family=Roboto:wght@300;400;500;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Reset all elements for Safari */
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+  }
+
+  #root {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  :root {
+    /* Leirisonda Authentic Brand Colors */
+    --leirisonda-primary: 345 98% 35%; /* rgb(179, 2, 41) - Authentic red */
+    --leirisonda-secondary: 185 100% 26%; /* rgb(0, 119, 132) - Authentic blue */
+    --leirisonda-footer: 184 100% 24%; /* rgb(0, 108, 120) - Footer blue */
+    --leirisonda-blue-light: 194 55% 95%; /* rgb(239, 245, 246) - Light blue */
+    --leirisonda-header-blue: 207 55% 65%; /* rgb(97, 165, 214) - Header blue */
+    --leirisonda-background: 0 0% 99%; /* rgb(252, 252, 252) - Main background */
+    --leirisonda-section: 0 0% 97%; /* rgb(248, 248, 248) - Section background */
+    --leirisonda-text: 0 0% 27%; /* rgb(68, 68, 68) - Primary text */
+    --leirisonda-text-light: 0 0% 97%; /* rgb(247, 247, 247) - Light text */
+    --leirisonda-text-muted: 0 0% 66%; /* rgb(168, 168, 168) - Muted text */
+
+    /* Modern CSS Variables */
+    --background: var(--leirisonda-background);
+    --foreground: var(--leirisonda-text);
+    --card: 0 0% 100%;
+    --card-foreground: var(--leirisonda-text);
+    --popover: 0 0% 100%;
+    --popover-foreground: var(--leirisonda-text);
+    --primary: var(--leirisonda-primary);
+    --primary-foreground: 0 0% 98%;
+    --secondary: var(--leirisonda-section);
+    --secondary-foreground: var(--leirisonda-text);
+    --muted: var(--leirisonda-section);
+    --muted-foreground: var(--leirisonda-text-muted);
+    --accent: var(--leirisonda-blue-light);
+    --accent-foreground: var(--leirisonda-secondary);
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 210 15% 91%; /* Softer border */
+    --input: 210 15% 91%;
+    --ring: var(--leirisonda-primary);
+    --radius: 8px; /* Slightly more modern radius */
+
+    /* Typography scale matching Leirisonda */
+    --font-size-hero: 42px;
+    --font-size-heading: 30px;
+    --font-size-subheading: 27px;
+    --font-size-small-heading: 21px;
+    --font-size-body: 16px;
+    --font-size-button: 17px;
+  }
+
+  .dark {
+    --background: 222 84% 5%;
+    --foreground: 210 40% 98%;
+    --card: 222 84% 5%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 84% 5%;
+    --popover-foreground: 210 40% 98%;
+    --primary: var(--leirisonda-primary);
+    --primary-foreground: 0 0% 98%;
+    --secondary: 217 32% 18%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 32% 18%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 217 32% 18%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 32% 18%;
+    --input: 217 32% 18%;
+    --ring: var(--leirisonda-primary);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family:
+      "Open Sans",
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
+    color: hsl(var(--leirisonda-text));
+    background-color: hsl(var(--leirisonda-background));
+    font-size: var(--font-size-body);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Open Sans", sans-serif;
+    color: hsl(var(--leirisonda-text));
+    line-height: 1.2;
+    margin: 0;
+    padding: 0;
+  }
+
+  h1 {
+    font-size: clamp(28px, 5vw, var(--font-size-hero));
+    font-weight: 700;
+  }
+
+  h2 {
+    font-size: clamp(24px, 4vw, var(--font-size-heading));
+    font-weight: 700;
+  }
+
+  h3 {
+    font-size: clamp(20px, 3vw, var(--font-size-subheading));
+    font-weight: 600;
+  }
+
+  h4 {
+    font-size: clamp(18px, 2.5vw, var(--font-size-small-heading));
+    font-weight: 500;
+  }
+
+  p {
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  button {
+    font-family: inherit;
+  }
+}
+
+@layer components {
+  /* Layout Components */
+  .leirisonda-layout {
+    min-height: 100vh;
+    background-color: hsl(var(--leirisonda-background));
+    display: flex;
+    flex-direction: column;
+  }
+
+  .leirisonda-main {
+    min-height: calc(100vh - 60px);
+    padding: 24px 32px;
+    background-color: hsl(var(--leirisonda-background));
+  }
+
+  /* Mobile Safari specific adjustments */
+  @media screen and (max-width: 768px) {
+    .leirisonda-layout {
+      min-height: calc(
+        100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom)
+      );
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .leirisonda-main {
+      min-height: calc(
+        100vh - 60px - env(safe-area-inset-top) - env(safe-area-inset-bottom)
+      );
+      padding-left: max(32px, env(safe-area-inset-left));
+      padding-right: max(32px, env(safe-area-inset-right));
+    }
+  }
+}
+
+.leirisonda-main {
+  @apply flex-1;
+  background-color: hsl(var(--leirisonda-background));
+  padding: 16px;
+  min-height: 100vh;
+}
+
+@media (min-width: 1024px) {
+  .leirisonda-main {
+    padding: 32px;
+    margin-left: 288px; /* 72 * 4 = 288px sidebar width */
+  }
+}
+
+/* Card Components */
+.card-leirisonda {
+  @apply w-full;
+  background-color: white;
+  border-radius: var(--radius);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid hsl(var(--border));
+  padding: 20px;
+  transition: all 0.2s ease-in-out;
+}
+
+.card-leirisonda:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+/* Button Components */
+.btn-leirisonda {
+  @apply inline-flex items-center justify-center;
+  font-family: "Roboto", sans-serif;
+  font-size: var(--font-size-button);
+  font-weight: 500;
+  background-color: hsl(var(--leirisonda-primary));
+  color: white;
+  padding: 12px 24px;
+  border-radius: var(--radius);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  min-height: 44px; /* Better touch target */
+}
+
+.btn-leirisonda:hover {
+  background-color: hsl(var(--leirisonda-primary) / 0.9);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-leirisonda-secondary {
+  background-color: hsl(var(--leirisonda-secondary));
+}
+
+.btn-leirisonda-secondary:hover {
+  background-color: hsl(var(--leirisonda-secondary) / 0.9);
+}
+
+/* Dashboard Hero */
+.dashboard-hero {
+  background: linear-gradient(
+    135deg,
+    hsl(var(--leirisonda-header-blue)) 0%,
+    hsl(var(--leirisonda-secondary)) 100%
+  );
+  color: white;
+  padding: 32px 20px;
+  border-radius: var(--radius);
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .dashboard-hero {
+    padding: 48px 32px;
+    margin-bottom: 32px;
+  }
+}
+
+/* Stats Cards */
+.stat-card-leirisonda {
+  @apply w-full;
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  text-align: center;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  border: 1px solid transparent;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.stat-card-leirisonda:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.stat-card-primary {
+  border-left: 4px solid hsl(var(--leirisonda-primary));
+}
+
+.stat-card-secondary {
+  border-left: 4px solid hsl(var(--leirisonda-secondary));
+}
+
+.stat-card-success {
+  border-left: 4px solid #10b981;
+}
+
+.stat-card-warning {
+  border-left: 4px solid #f59e0b;
+}
+
+.stat-card-danger {
+  border-left: 4px solid #ef4444;
+}
+
+/* Navigation */
+.nav-item-leirisonda {
+  @apply flex items-center w-full;
+  padding: 12px 16px;
+  color: hsl(var(--leirisonda-text));
+  text-decoration: none;
+  font-size: var(--font-size-body);
+  font-weight: 500;
+  border-radius: var(--radius);
+  margin-bottom: 4px;
+  transition: all 0.2s ease-in-out;
+  min-height: 44px; /* Better touch target */
+}
+
+.nav-item-leirisonda:hover {
+  background-color: hsl(var(--leirisonda-section));
+  color: hsl(var(--leirisonda-primary));
+}
+
+.nav-item-leirisonda.active {
+  background-color: hsl(var(--leirisonda-primary) / 0.1);
+  color: hsl(var(--leirisonda-primary));
+  border-left: 3px solid hsl(var(--leirisonda-primary));
+  font-weight: 600;
+}
+
+/* Form Elements */
+.input-leirisonda {
+  @apply w-full;
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 16px;
+  font-family: "Open Sans", sans-serif;
+  -webkit-transition: all 0.2s ease-in-out;
+  -o-transition: all 0.2s ease-in-out;
+  transition: all 0.2s ease-in-out;
+  background-color: white;
+  height: 48px; /* Fixed height for consistent icon positioning */
+  line-height: 24px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.input-leirisonda:focus {
+  border-color: hsl(var(--leirisonda-primary));
+  -webkit-box-shadow: 0 0 0 3px hsl(var(--leirisonda-primary) / 0.1);
+  box-shadow: 0 0 0 3px hsl(var(--leirisonda-primary) / 0.1);
+  outline: none;
+}
+
+/* Section Backgrounds */
+.section-leirisonda {
+  background-color: hsl(var(--leirisonda-section));
+  padding: 16px;
+  border-radius: var(--radius);
+}
+
+.section-leirisonda-blue {
+  background-color: hsl(var(--leirisonda-blue-light));
+  padding: 20px;
+  border-radius: var(--radius);
+}
+
+/* Status Badges */
+.badge-pending {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  background-color: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.badge-progress {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  background-color: #fff7ed;
+  color: #ea580c;
+  border: 1px solid #fed7aa;
+}
+
+.badge-completed {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  background-color: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+/* Login Page */
+.login-hero {
+  background: linear-gradient(
+    135deg,
+    rgb(97, 165, 214) 0%,
+    rgb(0, 119, 132) 100%
+  );
+  min-height: 100vh;
+  padding: 60px 20px 40px 20px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.login-card {
+  background: rgba(255, 255, 255, 0.98);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  -webkit-box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  width: 100%;
+  max-width: 400px;
+}
+
+/* Animations */
+.animate-leirisonda-fade {
+  animation: leirisondaFadeIn 0.4s ease-out;
+}
+
+.animate-leirisonda-slide {
+  animation: leirisondaSlideUp 0.3s ease-out;
+}
+
+@keyframes leirisondaFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes leirisondaSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hover Effects */
+.hover-leirisonda {
+  transition: all 0.2s ease-in-out;
+}
+
+.hover-leirisonda:hover {
+  transform: translateY(-1px);
+}
+
+/* Grid Systems */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .stats-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .content-grid {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+/* Mobile Optimizations */
+@media (max-width: 767px) {
+  .leirisonda-main {
+    padding: 16px;
+    margin-left: 0;
+  }
+
+  .dashboard-hero {
+    padding: 24px 16px;
+    text-align: center;
+  }
+
+  .stat-card-leirisonda {
+    padding: 16px;
+    min-height: 100px;
+  }
+
+  .card-leirisonda {
+    padding: 16px;
+  }
+
+  .btn-leirisonda {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Mobile Menu Button Safe Area */
+.mobile-menu-button {
+  position: fixed;
+  z-index: 50;
+  top: max(env(safe-area-inset-top, 16px) + 16px, 60px);
+  left: max(env(safe-area-inset-left, 16px) + 16px, 24px);
+}
+
+@supports not (env(safe-area-inset-top)) {
+  .mobile-menu-button {
+    top: 60px;
+    left: 24px;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  .print-force-new-page {
+    page-break-before: always;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus styles */
+*:focus-visible {
+  outline: 2px solid hsl(var(--leirisonda-primary));
+  outline-offset: 2px;
+}
+
+/* Header alignment utilities */
+.page-header {
+  @apply flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6;
+}
+
+.page-header-content {
+  @apply flex items-center gap-3 flex-1 min-w-0;
+}
+
+.page-header-actions {
+  @apply flex flex-wrap gap-2 w-full sm:w-auto lg:shrink-0;
+}
+
+.page-title {
+  @apply text-2xl lg:text-3xl font-bold text-gray-900 flex items-center;
+}
+
+.page-subtitle {
+  @apply text-gray-600 mt-1 text-sm lg:text-base;
+}
+
+/* Button group alignment fixes */
+.button-group {
+  @apply flex flex-wrap gap-2 items-center justify-start;
+}
+
+.button-group-mobile {
+  @apply flex flex-col sm:flex-row gap-2 w-full sm:w-auto;
+}
+
+.button-group-mobile > * {
+  @apply flex-1 sm:flex-none;
+}
+
+/* Card action alignment */
+.card-actions {
+  @apply flex flex-col sm:flex-row gap-2 mt-4;
+}
+
+.card-actions > * {
+  @apply flex-1 sm:flex-none;
+}
+
+/* Mobile-first responsive utilities */
+.mobile-stack {
+  @apply flex flex-col sm:flex-row gap-2;
+}
+
+.mobile-full {
+  @apply w-full sm:w-auto;
+}
+
+.truncate-mobile {
+  @apply truncate sm:text-clip sm:overflow-visible;
+}
+
+/* Better button alignment */
+.btn-leirisonda,
+.btn-primary,
+.btn-success,
+.btn-warning,
+.btn-danger {
+  @apply flex items-center justify-center gap-2;
+}
+
+/* Responsive text sizing */
+.responsive-title {
+  @apply text-xl sm:text-2xl lg:text-3xl;
+}
+
+.responsive-subtitle {
+  @apply text-sm sm:text-base;
+}
