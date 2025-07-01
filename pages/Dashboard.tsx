@@ -9,7 +9,6 @@ import {
   Users,
   Calendar,
   Activity,
-  BarChart3,
   Eye,
   Waves,
   Droplets,
@@ -77,6 +76,7 @@ export function Dashboard() {
     lastSync = undefined;
     syncData = () => Promise.resolve();
   }
+
   const [stats, setStats] = useState<DashboardStats>({
     totalWorks: 0,
     pendingWorks: 0,
@@ -88,43 +88,6 @@ export function Dashboard() {
   const [recentWorks, setRecentWorks] = useState<Work[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<Work[]>([]);
-
-  const navigateToWorks = (status?: string) => {
-    try {
-      console.log("🔗 Navegando para works com status:", status);
-      if (status) {
-        navigate(`/works?status=${status}`);
-      } else {
-        navigate("/works");
-      }
-    } catch (navError) {
-      console.error("❌ Erro na navegação para works:", navError);
-      try {
-        // Fallback para window.location
-        const url = status ? `/works?status=${status}` : "/works";
-        window.location.href = url;
-      } catch (locationError) {
-        console.error("❌ Erro no fallback de navegação:", locationError);
-      }
-    }
-  };
-
-  const navigateToWorksSheets = (type: "pending" | "completed") => {
-    try {
-      console.log("📋 Navegando para worksheets:", type);
-      navigate(`/works?worksheet=${type}`);
-    } catch (navError) {
-      console.error("❌ Erro na navegação para worksheets:", navError);
-      try {
-        window.location.href = `/works?worksheet=${type}`;
-      } catch (locationError) {
-        console.error(
-          "❌ Erro no fallback de navegação para worksheets:",
-          locationError,
-        );
-      }
-    }
-  };
 
   useEffect(() => {
     try {
@@ -153,7 +116,6 @@ export function Dashboard() {
   const performSearch = () => {
     try {
       console.log("🔍 Realizando pesquisa:", searchTerm);
-      // Use Firebase synced data instead of localStorage directly
       const worksList = works || [];
 
       const filtered = worksList.filter(
@@ -166,7 +128,7 @@ export function Dashboard() {
           work.contact?.toLowerCase().includes(searchTerm.toLowerCase()),
       );
 
-      setSearchResults(filtered.slice(0, 5)); // Limit to 5 results
+      setSearchResults(filtered.slice(0, 5));
     } catch (error) {
       console.error("❌ Erro na pesquisa:", error);
       setSearchResults([]);
@@ -176,7 +138,6 @@ export function Dashboard() {
   const loadDashboardData = () => {
     try {
       console.log("📊 Processando dados para dashboard...");
-      // Use Firebase synced data instead of localStorage directly
       const worksList = works || [];
 
       // Calculate stats with error protection
@@ -197,7 +158,7 @@ export function Dashboard() {
         pendingWorks,
         inProgressWorks,
         completedWorks,
-        remainingWorkSheets: 0, // Not used anymore
+        remainingWorkSheets: 0,
         workSheetsPending,
       });
 
@@ -315,7 +276,7 @@ export function Dashboard() {
 
   const getDaysUntilMaintenance = (maintenance: any) => {
     if (!maintenance.interventions || maintenance.interventions.length === 0) {
-      return 999; // Far future for sorting
+      return 999;
     }
 
     const lastIntervention = maintenance.interventions.sort(
@@ -334,346 +295,567 @@ export function Dashboard() {
   const getUpcomingMaintenances = () => {
     if (!maintenances) return [];
 
-    // Filter only active maintenances that have a next maintenance date
     const activeMaintances = maintenances.filter(
       (m: any) =>
         m.status === "active" && getNextMaintenanceDate(m) !== "A definir",
     );
 
-    // Sort by days until maintenance (closest first, including overdue)
     return activeMaintances
       .sort((a: any, b: any) => {
         const daysA = getDaysUntilMaintenance(a);
         const daysB = getDaysUntilMaintenance(b);
         return daysA - daysB;
       })
-      .slice(0, 5); // Show only next 5 maintenances
+      .slice(0, 5);
   };
 
+  const assignedWorks = works.filter(
+    (work) => work.assignedUsers && work.assignedUsers.includes(user?.id || ""),
+  );
+
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-6 animate-leirisonda-fade">
-      {/* Classy & Simple Header */}
-      <div className="relative bg-gradient-to-r from-gray-50 to-blue-50/30 rounded-3xl border border-gray-200/50 shadow-lg backdrop-blur-sm p-8 mb-8 overflow-hidden">
-        {/* Subtle background decoration */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100/40 to-transparent rounded-full -translate-y-16 translate-x-16"></div>
-        <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-blue-100/30 to-transparent rounded-full translate-y-12 -translate-x-12"></div>
-
-        <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
-          <div className="flex items-center space-x-6">
-            <div className="relative">
-              <div className="w-20 h-16 bg-white rounded-2xl flex items-center justify-center shadow-xl p-2">
-                <img
-                  src="https://cdn.builder.io/api/v1/image/assets%2F24b5ff5dbb9f4bb493659e90291d92bc%2F9862202d056a426996e6178b9981c1c7?format=webp&width=800"
-                  alt="Leirisonda Logo"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white shadow-lg">
-                <div className="w-1.5 h-1.5 bg-white rounded-full mx-auto mt-1"></div>
-              </div>
+    <div className="min-h-screen bg-gray-50 pb-safe">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 px-4 pt-8 pb-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-3">
+            <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm border border-gray-200 p-2">
+              <img
+                src="https://cdn.builder.io/api/v1/image/assets%2F24b5ff5dbb9f4bb493659e90291d92bc%2F9862202d056a426996e6178b9981c1c7?format=webp&width=800"
+                alt="Leirisonda Logo"
+                className="w-full h-full object-contain"
+              />
             </div>
-            <div className="space-y-2">
-              <h1 className="text-3xl font-light text-gray-900">
-                Olá,{" "}
-                <span className="font-semibold text-gray-800">
-                  {user?.name}
-                </span>
-              </h1>
-              <div className="flex items-center space-x-4 text-sm text-gray-600">
-                <div className="flex items-center space-x-2">
-                  <Calendar className="w-4 h-4" />
-                  <span>
-                    {format(new Date(), "EEEE, dd 'de' MMMM", { locale: pt })}
-                  </span>
-                </div>
-                <div className="w-px h-4 bg-gray-300"></div>
-                <div className="flex items-center space-x-2">
-                  <Clock className="w-4 h-4" />
-                  <span>{format(new Date(), "HH:mm")}</span>
-                </div>
-              </div>
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <span className="text-sm text-gray-600">Online</span>
             </div>
           </div>
-
-          {/* Status indicator */}
-          <div className="text-xs text-gray-500">
-            <div className="flex items-center space-x-2">
-              <div
-                className={`w-2 h-2 rounded-full ${isOnline ? "bg-green-500" : "bg-gray-400"}`}
-              ></div>
-              <span>{isOnline ? "Online" : "Offline"}</span>
-            </div>
+          <div className="text-sm text-gray-600">
+            {format(new Date(), "HH:mm")}
           </div>
+        </div>
+
+        <div className="space-y-1">
+          <h1 className="text-2xl font-normal text-gray-900">
+            Olá, <span className="font-semibold">{user?.name}</span>
+          </h1>
+          <p className="text-sm text-gray-600">
+            {format(new Date(), "EEEE, dd 'de' MMMM", { locale: pt })}
+          </p>
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Stats Cards */}
+      <div className="px-4 py-6 space-y-4">
         <Link
           to="/works?status=pendente"
-          className="stat-card-leirisonda stat-card-danger hover-leirisonda block"
+          className="block bg-white rounded-2xl border border-gray-200 p-6 shadow-sm"
+          style={{ borderLeft: "4px solid #EF4444" }}
         >
-          <div className="flex items-center justify-between mb-3">
-            <Clock className="w-6 h-6 text-red-600" />
-            <span className="text-2xl lg:text-3xl font-bold text-gray-900">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                <Clock className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Pendentes
+                </h3>
+                <p className="text-sm text-gray-600">Necessitam atenção</p>
+              </div>
+            </div>
+            <span className="text-3xl font-bold text-gray-900">
               {stats.pendingWorks}
             </span>
           </div>
-          <h3 className="text-sm font-semibold text-gray-900 mb-1">
-            Pendentes
-          </h3>
-          <p className="text-xs text-gray-600">Necessitam atenção</p>
         </Link>
 
         <Link
           to="/works?status=em_progresso"
-          className="stat-card-leirisonda stat-card-warning hover-leirisonda block"
+          className="block bg-white rounded-2xl border border-gray-200 p-6 shadow-sm"
+          style={{ borderLeft: "4px solid #F59E0B" }}
         >
-          <div className="flex items-center justify-between mb-3">
-            <TrendingUp className="w-6 h-6 text-orange-600" />
-            <span className="text-2xl lg:text-3xl font-bold text-gray-900">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-orange-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Em Progresso
+                </h3>
+                <p className="text-sm text-gray-600">A decorrer</p>
+              </div>
+            </div>
+            <span className="text-3xl font-bold text-gray-900">
               {stats.inProgressWorks}
             </span>
           </div>
-          <h3 className="text-sm font-semibold text-gray-900 mb-1">
-            Em Progresso
-          </h3>
-          <p className="text-xs text-gray-600">A decorrer</p>
         </Link>
 
         <Link
           to="/works?status=concluida"
-          className="stat-card-leirisonda stat-card-success hover-leirisonda block"
+          className="block bg-white rounded-2xl border border-gray-200 p-6 shadow-sm"
+          style={{ borderLeft: "4px solid #10B981" }}
         >
-          <div className="flex items-center justify-between mb-3">
-            <CheckCircle className="w-6 h-6 text-green-600" />
-            <span className="text-2xl lg:text-3xl font-bold text-gray-900">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                <CheckCircle className="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Concluídas
+                </h3>
+                <p className="text-sm text-gray-600">Finalizadas</p>
+              </div>
+            </div>
+            <span className="text-3xl font-bold text-gray-900">
               {stats.completedWorks}
             </span>
           </div>
-          <h3 className="text-sm font-semibold text-gray-900 mb-1">
-            Concluídas
-          </h3>
-          <p className="text-xs text-gray-600">Finalizadas</p>
         </Link>
 
         <Link
           to="/works?worksheet=pending"
-          className="stat-card-leirisonda stat-card-danger hover-leirisonda block"
+          className="block bg-white rounded-2xl border border-gray-200 p-6 shadow-sm"
+          style={{ borderLeft: "4px solid #EF4444" }}
         >
-          <div className="flex items-center justify-between mb-3">
-            <FileText className="w-6 h-6 text-red-600" />
-            <span className="text-2xl lg:text-3xl font-bold text-gray-900">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                <FileText className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Folhas por Fazer
+                </h3>
+                <p className="text-sm text-gray-600">Por preencher</p>
+              </div>
+            </div>
+            <span className="text-3xl font-bold text-gray-900">
               {stats.workSheetsPending}
             </span>
           </div>
-          <h3 className="text-sm font-semibold text-gray-900 mb-1">
-            Folhas por Fazer
-          </h3>
-          <p className="text-xs text-gray-600">Por preencher</p>
         </Link>
       </div>
 
       {/* Obras Atribuídas */}
-      {user &&
-        (() => {
-          const assignedWorks = works.filter(
-            (work) =>
-              work.assignedUsers && work.assignedUsers.includes(user.id),
-          );
-
-          // Debug log para Gonçalo
-          if (user.email === "gongonsilva@gmail.com") {
-            console.log(
-              `🎯 Debug Dashboard - Obras Atribuídas para ${user.name}:`,
-              {
-                totalWorks: works.length,
-                userID: user.id,
-                assignedWorks: assignedWorks.length,
-                worksWithAssignments: works.filter(
-                  (w) => w.assignedUsers && w.assignedUsers.length > 0,
-                ).length,
-                assignedWorksList: assignedWorks.map((w) => ({
-                  id: w.id,
-                  cliente: w.clientName,
-                  folhaObra: w.workSheetNumber,
-                  atribuidas: w.assignedUsers,
-                })),
-              },
-            );
-          }
-
-          return (
-            assignedWorks.length > 0 && (
-              <div className="w-full mb-6">
-                <div className="card-leirisonda">
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <Users className="w-5 h-5 text-blue-600" />
-                      </div>
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        Suas Obras Atribuídas ({assignedWorks.length})
-                      </h3>
-                    </div>
-                    <Button
-                      variant="outline"
-                      asChild
-                      className="hover-leirisonda"
-                    >
-                      <Link to={`/works?assignedTo=${user.id}`}>
-                        <Eye className="w-4 h-4 mr-2" />
-                        Ver Todas
-                      </Link>
-                    </Button>
-                  </div>
-
-                  <div className="space-y-4">
-                    {assignedWorks
-                      .sort(
-                        (a, b) =>
-                          new Date(b.createdAt).getTime() -
-                          new Date(a.createdAt).getTime(),
-                      )
-                      .slice(0, 3)
-                      .map((work) => {
-                        const statusInfo = getStatusInfo(work.status);
-                        return (
-                          <Link
-                            key={work.id}
-                            to={`/works/${work.id}`}
-                            className="block p-4 bg-blue-50 rounded-lg border border-blue-200 hover:bg-blue-100 transition-colors"
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex-1">
-                                <div className="flex items-center space-x-2 mb-1">
-                                  <span className="font-medium text-gray-900">
-                                    {work.workSheetNumber}
-                                  </span>
-                                  <span
-                                    className={`text-xs px-2 py-1 rounded-full ${statusInfo.className}`}
-                                  >
-                                    {statusInfo.label}
-                                  </span>
-                                </div>
-                                <p className="text-sm text-gray-600 mb-1">
-                                  {work.clientName}
-                                </p>
-                                <p className="text-xs text-gray-500">
-                                  {format(
-                                    new Date(work.createdAt),
-                                    "dd/MM/yyyy",
-                                    {
-                                      locale: pt,
-                                    },
-                                  )}
-                                </p>
-                              </div>
-                              <div className="text-blue-600">
-                                <Activity className="w-4 h-4" />
-                              </div>
-                            </div>
-                          </Link>
-                        );
-                      })}
-                  </div>
-                </div>
-              </div>
-            )
-          );
-        })()}
-
-      {/* Main Content Grid */}
-      <div className="content-grid">
-        {/* Recent Works */}
-        <div className="w-full">
-          <div className="card-leirisonda">
-            <div className="flex items-center justify-between mb-6">
+      {assignedWorks.length > 0 && (
+        <div className="px-4 pb-6">
+          <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Activity className="w-4 h-4 text-blue-600" />
+                  <Users className="w-5 h-5 text-blue-600" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900">
-                  Todas as Obras Recentes
+                  Suas Obras Atribuídas ({assignedWorks.length})
                 </h3>
               </div>
-              <Button variant="outline" asChild className="hover-leirisonda">
-                <Link to="/works">
+              <Button variant="outline" size="sm" asChild>
+                <Link to={`/works?assignedTo=${user?.id}`}>
                   <Eye className="w-4 h-4 mr-2" />
                   Ver Todas
                 </Link>
               </Button>
             </div>
 
-            {recentWorks.length === 0 ? (
-              <div className="section-leirisonda text-center py-8">
-                <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  Nenhuma obra registada
-                </h3>
-                <p className="text-gray-600 mb-4 text-sm">
-                  {user?.permissions.canCreateWorks
-                    ? "Comece por criar a sua primeira obra."
-                    : "Não existem obras registadas no sistema."}
-                </p>
-                {user?.permissions.canCreateWorks && (
-                  <button
-                    className="btn-leirisonda"
-                    onClick={() => navigate("/create-work")}
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Criar Primeira Obra
-                  </button>
-                )}
+            <div className="space-y-3">
+              {assignedWorks
+                .sort(
+                  (a, b) =>
+                    new Date(b.createdAt).getTime() -
+                    new Date(a.createdAt).getTime(),
+                )
+                .slice(0, 3)
+                .map((work) => {
+                  const statusInfo = getStatusInfo(work.status);
+                  return (
+                    <Link
+                      key={work.id}
+                      to={`/works/${work.id}`}
+                      className="block p-4 bg-blue-50 rounded-lg border border-blue-100"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <span className="font-medium text-gray-900">
+                              {work.workSheetNumber}
+                            </span>
+                            <span
+                              className={`text-xs px-2 py-1 rounded-full ${statusInfo.className}`}
+                            >
+                              {statusInfo.label}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-1">
+                            {work.clientName}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {format(new Date(work.createdAt), "dd/MM/yyyy", {
+                              locale: pt,
+                            })}
+                          </p>
+                        </div>
+                        <div className="text-blue-600">
+                          <Activity className="w-4 h-4" />
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Todas as Obras Recentes */}
+      <div className="px-4 pb-6">
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Activity className="w-5 h-5 text-blue-600" />
               </div>
-            ) : (
-              <div className="space-y-4">
-                {recentWorks.map((work) => {
+              <h3 className="text-lg font-semibold text-gray-900">
+                Todas as Obras Recentes
+              </h3>
+            </div>
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/works">
+                <Eye className="w-4 h-4 mr-2" />
+                Ver Todas
+              </Link>
+            </Button>
+          </div>
+
+          {recentWorks.length === 0 ? (
+            <div className="text-center py-8">
+              <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                Nenhuma obra registada
+              </h3>
+              <p className="text-gray-600 mb-4 text-sm">
+                {user?.permissions.canCreateWorks
+                  ? "Comece por criar a sua primeira obra."
+                  : "Não existem obras registadas no sistema."}
+              </p>
+              {user?.permissions.canCreateWorks && (
+                <Button onClick={() => navigate("/create-work")}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Criar Primeira Obra
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {recentWorks.map((work) => {
+                const statusInfo = getStatusInfo(work.status);
+                const WorkIcon = getWorkTypeIcon(work.type);
+                return (
+                  <div
+                    key={work.id}
+                    className="p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50"
+                    onClick={() => navigate(`/works/${work.id}`)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3 flex-1">
+                        <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                          <WorkIcon className="w-4 h-4 text-gray-600" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex flex-wrap items-center gap-2 mb-2">
+                            <h4 className="font-semibold text-gray-900">
+                              {work.clientName}
+                            </h4>
+                            <span className={statusInfo.className}>
+                              {statusInfo.label}
+                            </span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                              {getWorkTypeLabel(work.type)}
+                            </span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-1 text-sm text-gray-600">
+                            <div>
+                              <span className="font-medium">Folha:</span>{" "}
+                              {work.workSheetNumber}
+                            </div>
+                            <div>
+                              <span className="font-medium">Data:</span>{" "}
+                              {format(new Date(work.createdAt), "dd/MM/yyyy", {
+                                locale: pt,
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="ml-3">
+                        <Eye className="w-4 h-4 text-gray-400" />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Manutenções Próximas */}
+      <div className="px-4 pb-6">
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center">
+                <Waves className="w-5 h-5 text-teal-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Manutenções Próximas
+              </h3>
+            </div>
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/pool-maintenance">
+                <Eye className="w-4 h-4 mr-2" />
+                Ver Todas
+              </Link>
+            </Button>
+          </div>
+
+          {getUpcomingMaintenances().length === 0 ? (
+            <div className="text-center py-8">
+              <Waves className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                Nenhuma manutenção agendada
+              </h3>
+              <p className="text-gray-600 mb-4 text-sm">
+                Não há manutenções de piscinas programadas para breve.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {getUpcomingMaintenances().map((maintenance) => {
+                const nextDate = getNextMaintenanceDate(maintenance);
+                const daysUntil = getDaysUntilMaintenance(maintenance);
+                const isOverdue = daysUntil < 0;
+                const isUrgent = daysUntil <= 7 && daysUntil >= 0;
+
+                return (
+                  <div
+                    key={maintenance.id}
+                    className={`p-4 border-l-4 rounded-lg cursor-pointer hover:bg-gray-50 ${
+                      isOverdue
+                        ? "border-red-500 bg-red-50"
+                        : isUrgent
+                          ? "border-orange-500 bg-orange-50"
+                          : "border-teal-500 bg-teal-50"
+                    }`}
+                    onClick={() => navigate(`/maintenance/${maintenance.id}`)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3 flex-1">
+                        <div
+                          className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                            isOverdue
+                              ? "bg-red-100"
+                              : isUrgent
+                                ? "bg-orange-100"
+                                : "bg-teal-100"
+                          }`}
+                        >
+                          <Waves
+                            className={`w-4 h-4 ${
+                              isOverdue
+                                ? "text-red-600"
+                                : isUrgent
+                                  ? "text-orange-600"
+                                  : "text-teal-600"
+                            }`}
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h4 className="font-semibold text-gray-900">
+                              {maintenance.poolName}
+                            </h4>
+                            <span
+                              className={`text-xs px-2 py-1 rounded-full font-medium ${
+                                isOverdue
+                                  ? "bg-red-100 text-red-800"
+                                  : isUrgent
+                                    ? "bg-orange-100 text-orange-800"
+                                    : "bg-teal-100 text-teal-800"
+                              }`}
+                            >
+                              {isOverdue
+                                ? "Em atraso"
+                                : isUrgent
+                                  ? "Urgente"
+                                  : "Agendada"}
+                            </span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-1 text-sm text-gray-600">
+                            <div className="flex items-center space-x-1">
+                              <MapPin className="w-3 h-3" />
+                              <span>{maintenance.location}</span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <Calendar className="w-3 h-3" />
+                              <span>
+                                {isOverdue
+                                  ? `${Math.abs(daysUntil)} dias atraso`
+                                  : daysUntil === 0
+                                    ? "Hoje"
+                                    : daysUntil === 1
+                                      ? "Amanhã"
+                                      : `Em ${daysUntil} dias`}
+                              </span>
+                            </div>
+                          </div>
+                          {nextDate !== "A definir" && (
+                            <div className="text-xs text-gray-500 mt-1">
+                              Próxima: {nextDate}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="ml-3">
+                        <Eye className="w-4 h-4 text-gray-400" />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Ações Rápidas */}
+      <div className="px-4 pb-6">
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+              <Plus className="w-5 h-5 text-green-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Ações Rápidas
+            </h3>
+          </div>
+          <div className="space-y-3">
+            {user?.permissions.canCreateWorks && (
+              <Button
+                variant="outline"
+                className="w-full justify-start h-auto py-3"
+                asChild
+              >
+                <Link to="/create-work">
+                  <Plus className="w-4 h-4 mr-3" />
+                  Nova Obra
+                </Link>
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              className="w-full justify-start h-auto py-3"
+              asChild
+            >
+              <Link to="/pool-maintenance">
+                <Droplets className="w-4 h-4 mr-3" />
+                Manutenção Piscinas
+              </Link>
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full justify-start h-auto py-3"
+              asChild
+            >
+              <Link to="/works">
+                <FileText className="w-4 h-4 mr-3" />
+                Todas as Obras
+              </Link>
+            </Button>
+            {user?.role === "admin" && (
+              <>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start h-auto py-3"
+                  asChild
+                >
+                  <Link to="/create-user">
+                    <Users className="w-4 h-4 mr-3" />
+                    Novo Utilizador
+                  </Link>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start h-auto py-3 border-blue-200 bg-blue-50"
+                  asChild
+                >
+                  <Link to="/sync-diagnostic">
+                    <RefreshCw className="w-4 h-4 mr-3 text-blue-600" />
+                    <span className="text-blue-700">
+                      Diagnóstico de Sincronização
+                    </span>
+                  </Link>
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Pesquisar Obras */}
+      <div className="px-4 pb-8">
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+              <Search className="w-5 h-5 text-blue-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Pesquisar Obras
+            </h3>
+          </div>
+
+          <div className="space-y-4">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Cliente, folha obra, morada..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            {searchResults.length > 0 && (
+              <div className="space-y-2 max-h-60 overflow-y-auto">
+                {searchResults.map((work) => {
                   const statusInfo = getStatusInfo(work.status);
                   const WorkIcon = getWorkTypeIcon(work.type);
                   return (
                     <div
                       key={work.id}
-                      className="section-leirisonda hover-leirisonda cursor-pointer"
+                      className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
                       onClick={() => navigate(`/works/${work.id}`)}
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3 flex-1 min-w-0">
-                          <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                            <WorkIcon className="w-4 h-4 text-gray-600" />
+                      <div className="flex items-center space-x-2">
+                        <WorkIcon className="w-4 h-4 text-gray-500" />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900">
+                            {work.clientName}
+                          </p>
+                          <div className="flex items-center space-x-2 mt-1">
+                            <span
+                              className={`text-xs px-2 py-0.5 rounded-full ${statusInfo.className}`}
+                            >
+                              {statusInfo.label}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {work.workSheetNumber}
+                            </span>
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex flex-wrap items-center gap-2 mb-2">
-                              <h4 className="font-semibold text-gray-900 truncate">
-                                {work.clientName}
-                              </h4>
-                              <span className={statusInfo.className}>
-                                {statusInfo.label}
-                              </span>
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
-                                {getWorkTypeLabel(work.type)}
-                              </span>
-                            </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-sm text-gray-600">
-                              <div className="truncate">
-                                <span className="font-medium">Folha:</span>{" "}
-                                {work.workSheetNumber}
-                              </div>
-                              <div>
-                                <span className="font-medium">Data:</span>{" "}
-                                {format(
-                                  new Date(work.createdAt),
-                                  "dd/MM/yyyy",
-                                  {
-                                    locale: pt,
-                                  },
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="ml-3 flex-shrink-0">
-                          <Eye className="w-4 h-4 text-gray-400" />
                         </div>
                       </div>
                     </div>
@@ -681,286 +863,12 @@ export function Dashboard() {
                 })}
               </div>
             )}
-          </div>
 
-          {/* Manutenções Próximas */}
-          <div className="card-leirisonda">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center">
-                  <Waves className="w-4 h-4 text-teal-600" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Manutenç��es Próximas
-                </h3>
-              </div>
-              <Button variant="outline" asChild className="hover-leirisonda">
-                <Link to="/pool-maintenance">
-                  <Eye className="w-4 h-4 mr-2" />
-                  Ver Todas
-                </Link>
-              </Button>
-            </div>
-
-            {getUpcomingMaintenances().length === 0 ? (
-              <div className="section-leirisonda text-center py-8">
-                <Waves className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  Nenhuma manutenção agendada
-                </h3>
-                <p className="text-gray-600 mb-4 text-sm">
-                  Não há manutenções de piscinas programadas para breve.
-                </p>
-                <button
-                  className="btn-leirisonda-secondary"
-                  onClick={() => navigate("/pool-maintenance")}
-                >
-                  <Waves className="w-4 h-4 mr-2" />
-                  Ver Manutenções
-                </button>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {getUpcomingMaintenances().map((maintenance) => {
-                  const nextDate = getNextMaintenanceDate(maintenance);
-                  const daysUntil = getDaysUntilMaintenance(maintenance);
-                  const isOverdue = daysUntil < 0;
-                  const isUrgent = daysUntil <= 7 && daysUntil >= 0;
-
-                  return (
-                    <div
-                      key={maintenance.id}
-                      className={`section-leirisonda hover-leirisonda cursor-pointer border-l-4 ${
-                        isOverdue
-                          ? "border-red-500"
-                          : isUrgent
-                            ? "border-orange-500"
-                            : "border-teal-500"
-                      }`}
-                      onClick={() => navigate(`/maintenance/${maintenance.id}`)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3 flex-1 min-w-0">
-                          <div
-                            className={`w-8 h-8 rounded-lg flex items-center justify-center shadow-sm ${
-                              isOverdue
-                                ? "bg-red-100"
-                                : isUrgent
-                                  ? "bg-orange-100"
-                                  : "bg-teal-100"
-                            }`}
-                          >
-                            <Waves
-                              className={`w-4 h-4 ${
-                                isOverdue
-                                  ? "text-red-600"
-                                  : isUrgent
-                                    ? "text-orange-600"
-                                    : "text-teal-600"
-                              }`}
-                            />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex flex-wrap items-center gap-2 mb-2">
-                              <h4 className="font-semibold text-gray-900 truncate">
-                                {maintenance.poolName}
-                              </h4>
-                              <span
-                                className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                                  isOverdue
-                                    ? "bg-red-100 text-red-800 border border-red-200"
-                                    : isUrgent
-                                      ? "bg-orange-100 text-orange-800 border border-orange-200"
-                                      : "bg-teal-100 text-teal-800 border border-teal-200"
-                                }`}
-                              >
-                                {isOverdue
-                                  ? "Em atraso"
-                                  : isUrgent
-                                    ? "Urgente"
-                                    : "Agendada"}
-                              </span>
-                            </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-sm text-gray-600">
-                              <div className="flex items-center space-x-1">
-                                <MapPin className="w-3 h-3" />
-                                <span className="truncate">
-                                  {maintenance.location}
-                                </span>
-                              </div>
-                              <div className="flex items-center space-x-1">
-                                <Calendar className="w-3 h-3" />
-                                <span className="font-medium">
-                                  {nextDate === "A definir"
-                                    ? nextDate
-                                    : isOverdue
-                                      ? `${Math.abs(daysUntil)} dias atraso`
-                                      : daysUntil === 0
-                                        ? "Hoje"
-                                        : daysUntil === 1
-                                          ? "Amanhã"
-                                          : `Em ${daysUntil} dias`}
-                                </span>
-                              </div>
-                            </div>
-                            {nextDate !== "A definir" && (
-                              <div className="text-xs text-gray-500 mt-1">
-                                Próxima: {nextDate}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        <div className="ml-3 flex-shrink-0">
-                          <Eye className="w-4 h-4 text-gray-400" />
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+            {searchTerm && searchResults.length === 0 && (
+              <div className="text-center py-4">
+                <p className="text-sm text-gray-500">Nenhuma obra encontrada</p>
               </div>
             )}
-          </div>
-        </div>
-
-        {/* Sidebar Content */}
-        <div className="space-y-6 w-full">
-          {/* Quick Actions */}
-          <div className="card-leirisonda">
-            <div className="flex items-center space-x-3 mb-6">
-              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                <Plus className="w-4 h-4 text-green-600" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                Ações Rápidas
-              </h3>
-            </div>
-            <div className="space-y-3">
-              {user?.permissions.canCreateWorks && (
-                <Button
-                  variant="outline"
-                  className="w-full justify-start hover-leirisonda h-auto py-3"
-                  asChild
-                >
-                  <Link to="/create-work">
-                    <Plus className="w-4 h-4 mr-3" />
-                    Nova Obra
-                  </Link>
-                </Button>
-              )}
-              <Button
-                variant="outline"
-                className="w-full justify-start hover-leirisonda h-auto py-3"
-                asChild
-              >
-                <Link to="/pool-maintenance">
-                  <Droplets className="w-4 h-4 mr-3" />
-                  Manutenção Piscinas
-                </Link>
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full justify-start hover-leirisonda h-auto py-3"
-                asChild
-              >
-                <Link to="/works">
-                  <FileText className="w-4 h-4 mr-3" />
-                  Todas as Obras
-                </Link>
-              </Button>
-              {user?.role === "admin" && (
-                <>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start hover-leirisonda h-auto py-3"
-                    asChild
-                  >
-                    <Link to="/create-user">
-                      <Users className="w-4 h-4 mr-3" />
-                      Novo Utilizador
-                    </Link>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start hover-leirisonda h-auto py-3 border-blue-200 bg-blue-50 hover:bg-blue-100"
-                    asChild
-                  >
-                    <Link to="/sync-diagnostic">
-                      <RefreshCw className="w-4 h-4 mr-3 text-blue-600" />
-                      <span className="text-blue-700">
-                        Diagnóstico de Sincronização
-                      </span>
-                    </Link>
-                  </Button>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Search Works */}
-          <div className="card-leirisonda">
-            <div className="flex items-center space-x-3 mb-6">
-              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Search className="w-4 h-4 text-blue-600" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                Pesquisar Obras
-              </h3>
-            </div>
-
-            <div className="space-y-4">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Cliente, folha obra, morada..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="input-leirisonda text-sm"
-                />
-              </div>
-
-              {searchResults.length > 0 && (
-                <div className="space-y-2 max-h-60 overflow-y-auto">
-                  {searchResults.map((work) => {
-                    const statusInfo = getStatusInfo(work.status);
-                    const WorkIcon = getWorkTypeIcon(work.type);
-                    return (
-                      <div
-                        key={work.id}
-                        className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                        onClick={() => navigate(`/works/${work.id}`)}
-                      >
-                        <div className="flex items-center space-x-2">
-                          <WorkIcon className="w-4 h-4 text-gray-500" />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 truncate">
-                              {work.clientName}
-                            </p>
-                            <div className="flex items-center space-x-2 mt-1">
-                              <span
-                                className={`text-xs px-2 py-0.5 rounded-full ${statusInfo.className}`}
-                              >
-                                {statusInfo.label}
-                              </span>
-                              <span className="text-xs text-gray-500">
-                                {work.workSheetNumber}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {searchTerm && searchResults.length === 0 && (
-                <div className="text-center py-4">
-                  <p className="text-sm text-gray-500">
-                    Nenhuma obra encontrada
-                  </p>
-                </div>
-              )}
-            </div>
           </div>
         </div>
       </div>
