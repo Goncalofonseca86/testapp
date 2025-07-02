@@ -141,7 +141,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
           // Em caso de erro, ser conservador e recarregar em vez de redirecionar
           window.location.reload();
         }
-      }, 15000); // Aumentado para 15 segundos para dar mais tempo
+      }, 8000); // Reduzido para 8 segundos para evitar timeout longo
 
       return () => clearTimeout(timeout);
     }
@@ -162,13 +162,21 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
           localStorage.removeItem("work_created_timestamp");
           setJustCreatedWork(false);
           setIsRecoveringFromWorkCreation(false);
+
+          // Se ainda não temos usuário, forçar reload
+          if (!user) {
+            console.log(
+              "🔄 Forçando reload após cleanup - nenhum usuário encontrado",
+            );
+            window.location.reload();
+          }
         } catch (error) {
           console.warn("Erro ao limpar flags:", error);
         }
-      }, 20000); // 20 segundos para dar bastante tempo
+      }, 10000); // Reduzido para 10 segundos
 
       return () => clearTimeout(cleanupTimer);
-    }, []);
+    }, [user]);
 
     return (
       <div className="min-h-screen bg-gradient-to-br from-leirisonda-blue-light to-white flex items-center justify-center">
@@ -209,7 +217,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         const sessionUser = sessionStorage.getItem("temp_user_session");
         const justCreated = sessionStorage.getItem("just_created_work");
 
-        // Se há qualquer indicação de sessão válida
+        // Se há qualquer indicação de sessão v��lida
         if (storedUser || sessionUser || justCreated === "true") {
           console.log(
             "🔄 Sessão detectada, tentativa de recuperação:",
@@ -265,6 +273,14 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
                     ? "A sincronizar com o servidor..."
                     : "Se demorar muito, será redirecionado automaticamente..."}
               </p>
+              {recoveryAttempts >= 2 && (
+                <button
+                  onClick={() => window.location.reload()}
+                  className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                >
+                  Recarregar Agora
+                </button>
+              )}
             </div>
           </div>
         );
