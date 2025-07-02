@@ -1,0 +1,55 @@
+/* PWA Style for Leirisonda */
+:root {
+  --leirisonda-primary: #b30229;
+  --leirisonda-secondary: #007784;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family:
+    "Open Sans",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  background-color: #f9fafb;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Loading States */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #61a5d6 0%, #007784 100%);
+  color: white;
+  font-size: 18px;
+}
+
+/* PWA Install Banner */
+.pwa-install-banner {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--leirisonda-secondary);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  z-index: 10000;
+  font-family: sans-serif;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+  .pwa-install-banner {
+    left: 10px;
+    right: 10px;
+    transform: none;
+  }
+}
