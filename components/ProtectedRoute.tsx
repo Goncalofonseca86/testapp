@@ -87,6 +87,22 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   // PROTEÇÃO ESPECIAL: Se acabou de criar obra, forçar que mostre conteúdo mesmo que user seja null momentaneamente
   if (justCreatedWork) {
     console.log("🛡️ PROTEÇÃO ATIVA: Mostrando conteúdo pós-criação de obra");
+
+    // Cleanup após um tempo para evitar que a flag permaneça indefinidamente
+    React.useEffect(() => {
+      const cleanupTimer = setTimeout(() => {
+        try {
+          sessionStorage.removeItem("just_created_work");
+          localStorage.removeItem("work_created_timestamp");
+          console.log("🧹 Flags de criação de obra limpas automaticamente");
+        } catch (error) {
+          console.warn("Erro ao limpar flags:", error);
+        }
+      }, 10000); // 10 segundos após carregamento
+
+      return () => clearTimeout(cleanupTimer);
+    }, []);
+
     return <>{children}</>;
   }
 
