@@ -23,6 +23,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { useFirebaseSync } from "@/hooks/use-firebase-sync";
 import { SyncStatus } from "@/components/SyncStatus";
+import { NotificationSetup } from "@/components/NotificationSetup";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 
