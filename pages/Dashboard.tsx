@@ -873,6 +873,9 @@ export function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Componente de Status de Sincronização para Debug */}
+      <SyncStatus />
     </div>
   );
 }
