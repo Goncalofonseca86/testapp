@@ -1,70 +1,42 @@
-const CACHE_NAME = "leirisonda-v1.0.0";
+const CACHE_NAME = "leirisonda-v2.0.1";
 const urlsToCache = [
   "/",
-  "/static/js/bundle.js",
-  "/static/css/main.css",
   "/manifest.json",
+  "/favicon-leirisonda.svg",
+  "/pwa-style.css",
 ];
 
-// Install event
-self.addEventListener("install", (event) => {
+self.addEventListener("install", function (event) {
   event.waitUntil(
-    caches
-      .open(CACHE_NAME)
-      .then((cache) => {
-        console.log("Leirisonda cache opened");
-        return cache.addAll(urlsToCache);
-      })
-      .then(() => {
-        console.log("Leirisonda files cached");
-        return self.skipWaiting();
-      }),
-  );
-});
-
-// Fetch event
-self.addEventListener("fetch", (event) => {
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      // Return cached version or fetch from network
-      return response || fetch(event.request);
+    caches.open(CACHE_NAME).then(function (cache) {
+      console.log("Opened cache");
+      return cache.addAll(urlsToCache);
     }),
   );
 });
 
-// Activate event
-self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    caches
-      .keys()
-      .then((cacheNames) => {
-        return Promise.all(
-          cacheNames.map((cacheName) => {
-            if (cacheName !== CACHE_NAME) {
-              console.log("Deleting old cache:", cacheName);
-              return caches.delete(cacheName);
-            }
-          }),
-        );
-      })
-      .then(() => {
-        return self.clients.claim();
-      }),
+self.addEventListener("fetch", function (event) {
+  event.respondWith(
+    caches.match(event.request).then(function (response) {
+      // Cache hit - return response
+      if (response) {
+        return response;
+      }
+      return fetch(event.request);
+    }),
   );
 });
 
-// Push notification event (for future use)
-self.addEventListener("push", (event) => {
-  const options = {
-    body: event.data ? event.data.text() : "Nova notificação da Leirisonda",
-    icon: "/manifest-icon-192.png",
-    badge: "/manifest-icon-192.png",
-    vibrate: [100, 50, 100],
-    data: {
-      dateOfArrival: Date.now(),
-      primaryKey: 1,
-    },
-  };
-
-  event.waitUntil(self.registration.showNotification("Leirisonda", options));
+self.addEventListener("activate", function (event) {
+  event.waitUntil(
+    caches.keys().then(function (cacheNames) {
+      return Promise.all(
+        cacheNames.map(function (cacheName) {
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName);
+          }
+        }),
+      );
+    }),
+  );
 });
