@@ -322,6 +322,44 @@ export function CreateWork() {
           const workId = await safeCreateWork(workData);
           console.log("✅ OBRA CRIADA COM SUCESSO ID:", workId);
 
+          // ENVIAR NOTIFICAÇÕES PUSH para utilizadores atribuídos
+          try {
+            if (workData.assignedUsers && workData.assignedUsers.length > 0) {
+              console.log(
+                "📤 Enviando notificações push para utilizadores atribuídos...",
+              );
+
+              // Importar serviço de notificações dinamicamente
+              const { notificationService } = await import(
+                "@/lib/notifications"
+              );
+
+              await notificationService.sendWorkNotification(
+                workData.assignedUsers,
+                {
+                  clientName: workData.clientName,
+                  workSheetNumber: workData.workSheetNumber,
+                  address: workData.address,
+                  type: workData.type,
+                  createdBy: user?.id || user?.email || "unknown",
+                  workId: workId,
+                },
+              );
+
+              console.log("✅ Notificações push enviadas com sucesso");
+            } else {
+              console.log(
+                "ℹ️ Nenhum utilizador atribuído - sem notificações a enviar",
+              );
+            }
+          } catch (notificationError) {
+            console.warn(
+              "⚠️ Erro ao enviar notificações push (não crítico):",
+              notificationError,
+            );
+            // Não falhar a criação da obra por causa das notificações
+          }
+
           // LOGGING DE SUCESSO
           localStorage.setItem(
             "last_work_operation",
