@@ -185,7 +185,10 @@ class NotificationService {
         return null;
       }
 
+      // VAPID key para Firebase Cloud Messaging
+      // Em produção, esta chave deve ser configurada no Firebase Console
       const vapidKey =
+        import.meta.env.VITE_FIREBASE_VAPID_KEY ||
         "BMqzPGS8rC4Q8Qr4yJrVQGf9Y2O5xF8hU7vT6nB3kR2jL4mN9pQ1sA7eH5iW0dC6f";
 
       const token = await getToken(this.messaging, {
