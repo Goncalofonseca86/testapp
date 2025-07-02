@@ -151,7 +151,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
 
-        // Tentativa 3: Verificar se há obra acabada de criar (manter sessão)
+        // Tentativa 3: Verificar se há obra acabada de criar (manter sessão) - PRIORIDADE ALTA
         if (!recoveredUser) {
           try {
             const justCreatedWork = sessionStorage.getItem("just_created_work");
@@ -159,26 +159,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const workCreatedTimestamp = localStorage.getItem(
               "work_created_timestamp",
             );
+            const sessionPreserved = localStorage.getItem("session_preserved");
 
-            if (justCreatedWork === "true" || workCreatedTimestamp) {
+            if (
+              justCreatedWork === "true" ||
+              workCreatedTimestamp ||
+              sessionPreserved
+            ) {
               console.log(
-                "🏗️ Detectada criação de obra recente, tentando recuperar sessão...",
+                "🏗️ DETECTADA CRIAÇÃO DE OBRA RECENTE - RECUPERAÇÃO PRIORITÁRIA",
               );
 
-              // Primeira opção: SessionStorage
+              // Estratégia 1: SessionStorage (mais confiável pós-criação)
               if (sessionUser) {
-                const tempUser = JSON.parse(sessionUser);
-                if (tempUser && tempUser.email && tempUser.name) {
-                  console.log(
-                    "🛡️ Recuperando sessão via sessionStorage:",
-                    tempUser.email,
-                  );
-                  recoveredUser = tempUser;
+                try {
+                  const tempUser = JSON.parse(sessionUser);
+                  if (
+                    tempUser &&
+                    tempUser.email &&
+                    tempUser.name &&
+                    tempUser.id
+                  ) {
+                    console.log(
+                      "🛡️ RECUPERAÇÃO PRIORITÁRIA via sessionStorage:",
+                      tempUser.email,
+                    );
+                    recoveredUser = tempUser;
+                  }
+                } catch (parseError) {
+                  console.warn("Erro ao parsear sessionUser:", parseError);
                 }
               }
 
-              // Segunda opção: Backup por ID de usuário
+              // Estratégia 2: Backup por ID de usuário (muito confiável)
               if (!recoveredUser) {
+                console.log("🔍 Procurando backups de usuário...");
                 for (let i = 0; i < localStorage.length; i++) {
                   const key = localStorage.key(i);
                   if (key && key.startsWith("user_backup_")) {
@@ -186,9 +201,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                       const backupUser = JSON.parse(
                         localStorage.getItem(key) || "",
                       );
-                      if (backupUser && backupUser.email && backupUser.name) {
+                      if (
+                        backupUser &&
+                        backupUser.email &&
+                        backupUser.name &&
+                        backupUser.id
+                      ) {
                         console.log(
-                          "🛡️ Recuperando sessão via backup:",
+                          "🛡️ RECUPERAÇÃO PRIORITÁRIA via backup:",
                           backupUser.email,
                         );
                         recoveredUser = backupUser;
@@ -201,8 +221,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 }
               }
 
-              // Terceira opção: Último usuário conhecido
+              // Estratégia 3: Último usuário conhecido + globais
               if (!recoveredUser) {
+                console.log("🔍 Tentando último usuário conhecido...");
                 const lastUserEmail = localStorage.getItem(
                   "leirisonda_last_user",
                 );
@@ -222,11 +243,62 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     };
                     recoveredUser = loginUser;
                     console.log(
-                      "🛡️ Recuperando sessão via último usuário:",
+                      "🛡️ RECUPERAÇÃO PRIORITÁRIA via usuário global:",
                       globalUser.name,
                     );
                   }
                 }
+              }
+
+              // Estratégia 4: Tentar recuperar via localStorage principal novamente
+              if (!recoveredUser) {
+                try {
+                  const stored = localStorage.getItem("leirisonda_user");
+                  if (stored) {
+                    const parsedUser = JSON.parse(stored);
+                    if (
+                      parsedUser &&
+                      parsedUser.email &&
+                      parsedUser.name &&
+                      parsedUser.id
+                    ) {
+                      console.log(
+                        "🛡️ RECUPERAÇÃO PRIORITÁRIA via localStorage principal:",
+                        parsedUser.email,
+                      );
+                      recoveredUser = parsedUser;
+                    }
+                  }
+                } catch (parseError) {
+                  console.warn("Erro ao re-parsear localStorage:", parseError);
+                }
+              }
+
+              // Se conseguiu recuperar usuário
+              if (recoveredUser) {
+                console.log(
+                  "✅ SESSÃO RECUPERADA COM SUCESSO APÓS CRIAÇÃO DE OBRA",
+                );
+
+                // Garantir que está bem preservada para o futuro
+                localStorage.setItem(
+                  "leirisonda_user",
+                  JSON.stringify(recoveredUser),
+                );
+                sessionStorage.setItem(
+                  "temp_user_session",
+                  JSON.stringify(recoveredUser),
+                );
+                localStorage.setItem(
+                  `user_backup_${recoveredUser.id}`,
+                  JSON.stringify(recoveredUser),
+                );
+                localStorage.setItem(
+                  "leirisonda_last_user",
+                  recoveredUser.email,
+                );
+              } else {
+                console.warn("❌ FALHA NA RECUPERAÇÃO DE SESSÃO PÓS-OBRA");
               }
             }
           } catch (sessionError) {
