@@ -321,6 +321,7 @@ export class FirebaseService {
 
   async createWork(
     workData: Omit<Work, "id" | "createdAt" | "updatedAt">,
+    createdBy?: string,
   ): Promise<string> {
     console.log(
       "🔄 INICIANDO CRIAÇÃO DE OBRA SUPER ROBUSTA:",
@@ -405,7 +406,7 @@ export class FirebaseService {
 
               firebaseSuccess = true;
               console.log(
-                "��� FIREBASE SYNC CONCLUÍDO EM BACKGROUND:",
+                "🔥 FIREBASE SYNC CONCLUÍDO EM BACKGROUND:",
                 newWork.id,
               );
 
