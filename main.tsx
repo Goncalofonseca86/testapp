@@ -8,6 +8,8 @@ import { ErrorBoundary } from "./components/ErrorBoundary";
 import { AuthProvider } from "./components/AuthProvider";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Layout } from "./components/Layout";
+import { Toaster } from "./components/ui/toaster";
+import { WorkNotifications } from "./components/WorkNotifications";
 
 // Pages
 import { Login } from "./pages/Login";
@@ -100,6 +102,10 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
+
+        {/* Sistema de Notificações e Toasts */}
+        <WorkNotifications />
+        <Toaster />
       </AuthProvider>
     </ErrorBoundary>
   );

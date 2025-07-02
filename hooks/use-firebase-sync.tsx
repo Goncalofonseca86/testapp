@@ -67,11 +67,44 @@ export function useFirebaseSync() {
       }
     };
 
+    // NOVO: Listener para quando uma obra é criada em outra aba
+    const handleNewWork = (event: CustomEvent) => {
+      console.log("🆕 Nova obra detectada em outra aba:", event.detail);
+      if (user && isFirebaseAvailable) {
+        // Sync imediato para buscar a nova obra
+        triggerInstantSync("new_work_detected");
+      } else {
+        // Se offline, recarregar dados locais consolidados
+        loadLocalDataAsFallback();
+      }
+    };
+
     // Listen for visibility changes to trigger sync when tab becomes active
     const handleVisibilityChange = () => {
       if (!document.hidden && user && isFirebaseAvailable && isOnline) {
         console.log("👁️ Tab became visible - triggering sync...");
         triggerInstantSync("tab_visible");
+      }
+    };
+
+    // NOVO: Listener para mudanças no localStorage (cross-tab)
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === "leirisonda_last_sync_event" && event.newValue) {
+        try {
+          const syncEvent = JSON.parse(event.newValue);
+          if (syncEvent.type === "new_work_created") {
+            console.log("📱 Nova obra detectada via localStorage:", syncEvent);
+            // Recarregar dados locais imediatamente
+            loadLocalDataAsFallback();
+
+            // Sync com Firebase se disponível
+            if (user && isFirebaseAvailable && isOnline) {
+              setTimeout(() => triggerInstantSync("storage_new_work"), 1000);
+            }
+          }
+        } catch (error) {
+          console.warn("Erro ao processar evento de storage:", error);
+        }
       }
     };
 
@@ -81,6 +114,11 @@ export function useFirebaseSync() {
       "leirisonda_sync_trigger",
       handleCrossTabSync as EventListener,
     );
+    window.addEventListener(
+      "leirisonda_new_work",
+      handleNewWork as EventListener,
+    );
+    window.addEventListener("storage", handleStorageChange);
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
@@ -90,6 +128,11 @@ export function useFirebaseSync() {
         "leirisonda_sync_trigger",
         handleCrossTabSync as EventListener,
       );
+      window.removeEventListener(
+        "leirisonda_new_work",
+        handleNewWork as EventListener,
+      );
+      window.removeEventListener("storage", handleStorageChange);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [user, isFirebaseAvailable]);
@@ -121,7 +164,7 @@ export function useFirebaseSync() {
         }
 
         if (!isFirebaseAvailable) {
-          throw new Error("Firebase indisponível");
+          throw new Error("Firebase indispon��vel");
         }
 
         // 2. Sincronização em etapas com timeout
@@ -455,12 +498,15 @@ export function useFirebaseSync() {
     async (
       workData: Omit<Work, "id" | "createdAt" | "updatedAt">,
     ): Promise<string> => {
+      // Incluir informação de quem criou a obra
+      const createdBy = user?.id || user?.email || "unknown";
+
       return withInstantSync(
-        () => firebaseService.createWork(workData),
+        () => firebaseService.createWork(workData, createdBy),
         "create_work",
       );
     },
-    [withInstantSync],
+    [withInstantSync, user],
   );
 
   const createMaintenance = useCallback(

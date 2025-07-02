@@ -33,6 +33,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useFirebaseSync } from "@/hooks/use-firebase-sync";
 import { firebaseService } from "@/services/FirebaseService";
 import { WorkSaveHelper } from "@/lib/work-save-diagnostics";
+import { WorkCreationDiagnostics } from "@/components/WorkCreationDiagnostics";
 
 const workTypes = [
   { value: "piscina", label: "Piscina" },
@@ -231,7 +232,29 @@ export function CreateWork() {
         }
 
         try {
-          console.log("��� PREPARANDO DADOS DA OBRA...");
+          console.log("🏗️ PREPARANDO DADOS DA OBRA...");
+
+          // LOGGING ESPECÍFICO para rastrear problema do Gonçalo
+          localStorage.setItem(
+            "last_work_operation",
+            `create_work_started_${new Date().toISOString()}`,
+          );
+          localStorage.setItem(
+            "work_creation_debug",
+            JSON.stringify({
+              user: user?.email,
+              timestamp: new Date().toISOString(),
+              formData: {
+                clientName: formData.clientName,
+                workSheetNumber: formData.workSheetNumber,
+                assignedUsers: formData.assignedUsers,
+              },
+              sessionStatus: {
+                localStorage: !!localStorage.getItem("leirisonda_user"),
+                sessionStorage: !!sessionStorage.getItem("temp_user_session"),
+              },
+            }),
+          );
 
           // Prepare work data - GARANTIR que assignedUsers seja preservado
           const workData = {
@@ -299,6 +322,13 @@ export function CreateWork() {
           const workId = await safeCreateWork(workData);
           console.log("✅ OBRA CRIADA COM SUCESSO ID:", workId);
 
+          // LOGGING DE SUCESSO
+          localStorage.setItem(
+            "last_work_operation",
+            `create_work_success_${new Date().toISOString()}`,
+          );
+          localStorage.setItem("last_created_work_id", workId);
+
           // MARCAR que obra foi criada para ErrorBoundary saber
           sessionStorage.setItem("just_created_work", "true");
 
@@ -329,36 +359,66 @@ export function CreateWork() {
 
           console.log("✅ PROCESSO CONCLUÍDO - REDIRECIONANDO...");
 
-          // Navegação DEFINITIVA para Dashboard após guardar obra
+          // GARANTIR PRESERVAÇÃO DA SESSÃO antes de navegar
+          try {
+            const currentUser = user;
+            if (currentUser) {
+              // Múltiplos backups da sessão antes de navegar
+              localStorage.setItem(
+                "leirisonda_user",
+                JSON.stringify(currentUser),
+              );
+              sessionStorage.setItem(
+                "temp_user_session",
+                JSON.stringify(currentUser),
+              );
+              localStorage.setItem(
+                "user_backup_" + currentUser.id,
+                JSON.stringify(currentUser),
+              );
+              localStorage.setItem("session_preserved", "true");
+
+              console.log("🛡️ SESSÃO PRESERVADA ANTES DA NAVEGAÇÃO");
+            }
+          } catch (sessionError) {
+            console.warn("⚠️ Erro ao preservar sessão:", sessionError);
+          }
+
+          // Navegação ROBUSTA para Dashboard após guardar obra
           setTimeout(() => {
             try {
               console.log("🏠 Navegando para Dashboard após obra criada");
-              // Tentativa 1: React Router navigate para Dashboard
-              navigate("/dashboard");
+
+              // PRIMEIRO: Tentar navigate do React Router (mais suave)
+              navigate("/dashboard", { replace: true });
+
+              // VERIFICAÇÃO: Se após 2 segundos ainda está na mesma página, forçar navegação
+              setTimeout(() => {
+                if (window.location.pathname.includes("/create-work")) {
+                  console.warn(
+                    "🔄 Navigate não funcionou, usando window.location...",
+                  );
+                  window.location.href = "/dashboard";
+                }
+              }, 2000);
             } catch (navError) {
-              console.warn(
-                "Navigate falhou, usando window.location para Dashboard",
-              );
+              console.warn("❌ React Router navigate falhou:", navError);
+
+              // FALLBACK: Usar window.location diretamente
               try {
-                // Tentativa 2: window.location para Dashboard
                 window.location.href = "/dashboard";
               } catch (locationError) {
-                console.warn(
-                  "window.location falhou, usando replace para Dashboard",
-                );
+                console.error("❌ window.location falhou:", locationError);
+
+                // ÚLTIMO RECURSO: Recarregar (irá para home/dashboard)
                 try {
-                  // Tentativa 3: window.location.replace para Dashboard
-                  window.location.replace("/dashboard");
-                } catch (replaceError) {
-                  console.error(
-                    "Todas as tentativas de navegação falharam, recarregando",
-                  );
-                  // Última tentativa: Recarregar página (vai para Dashboard por default)
                   window.location.reload();
+                } catch (reloadError) {
+                  console.error("❌ Até reload falhou:", reloadError);
                 }
               }
             }
-          }, 500);
+          }, 1000); // Dar mais tempo para que tudo seja processado
         } catch (err) {
           console.error("❌ ERRO AO CRIAR OBRA:", err);
 
@@ -959,6 +1019,9 @@ export function CreateWork() {
             )}
           </form>
         </div>
+
+        {/* Componente de Diagnóstico para Gonçalo */}
+        <WorkCreationDiagnostics />
       </div>
     );
   } catch (componentError) {
@@ -988,6 +1051,9 @@ export function CreateWork() {
             </Button>
           </div>
         </div>
+
+        {/* Componente de Diagnóstico mesmo em caso de erro */}
+        <WorkCreationDiagnostics />
       </div>
     );
   }

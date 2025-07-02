@@ -22,6 +22,7 @@ import { Work, DashboardStats } from "@shared/types";
 import { useAuth } from "@/components/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { useFirebaseSync } from "@/hooks/use-firebase-sync";
+import { SyncStatus } from "@/components/SyncStatus";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 
@@ -872,6 +873,9 @@ export function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Componente de Status de Sincronização para Debug */}
+      <SyncStatus />
     </div>
   );
 }
