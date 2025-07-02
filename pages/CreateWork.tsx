@@ -322,6 +322,13 @@ export function CreateWork() {
           const workId = await safeCreateWork(workData);
           console.log("✅ OBRA CRIADA COM SUCESSO ID:", workId);
 
+          // LOGGING DE SUCESSO
+          localStorage.setItem(
+            "last_work_operation",
+            `create_work_success_${new Date().toISOString()}`,
+          );
+          localStorage.setItem("last_created_work_id", workId);
+
           // MARCAR que obra foi criada para ErrorBoundary saber
           sessionStorage.setItem("just_created_work", "true");
 
