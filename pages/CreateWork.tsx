@@ -422,6 +422,27 @@ export function CreateWork() {
         } catch (err) {
           console.error("❌ ERRO AO CRIAR OBRA:", err);
 
+          // VERIFICAÇÃO CRÍTICA: Se obra foi criada apesar do erro
+          try {
+            const workWasCreated = localStorage.getItem("last_created_work_id");
+            if (workWasCreated) {
+              console.log(
+                "✅ OBRA FOI CRIADA APESAR DO ERRO - CONTINUANDO PARA DASHBOARD",
+              );
+
+              // Preservar sessão e navegar
+              setTimeout(() => {
+                navigate("/dashboard", { replace: true });
+              }, 1000);
+
+              setError(""); // Limpar erro se obra foi criada
+              setIsSubmitting(false);
+              return;
+            }
+          } catch (checkError) {
+            console.warn("Erro ao verificar se obra foi criada:", checkError);
+          }
+
           // Tratamento de erro DEFENSIVO - nunca causar ErrorBoundary
           try {
             const errorMessage =
@@ -444,9 +465,21 @@ export function CreateWork() {
               setError(
                 "Problema com atribuições de usuários. Verifique as seleções e tente novamente.",
               );
+            } else if (
+              errorMessage.includes("auth") ||
+              errorMessage.includes("authentication") ||
+              errorMessage.includes("login")
+            ) {
+              // ERRO DE AUTENTICAÇÃO APÓS CRIAÇÃO - MUITO PROVÁVEL QUE OBRA FOI CRIADA
+              setError(
+                "Obra pode ter sido guardada com sucesso. Verifique a lista de obras antes de tentar novamente.",
+              );
+              console.log(
+                "⚠️ Erro de autenticação após tentativa de criação - obra provavelmente foi guardada",
+              );
             } else {
               setError(
-                "Erro ao guardar obra. Por favor, tente novamente ou verifique a lista de obras.",
+                "Erro ao guardar obra. Por favor, verifique a lista de obras antes de tentar novamente.",
               );
             }
 
@@ -457,7 +490,9 @@ export function CreateWork() {
           } catch (handlingError) {
             // Último recurso se até o tratamento de erro falhar
             console.error("❌ Erro no tratamento de erro:", handlingError);
-            setError("Erro interno. Tente recarregar a página.");
+            setError(
+              "Erro interno. Verifique a lista de obras antes de tentar novamente.",
+            );
             setIsSubmitting(false);
           }
         }
