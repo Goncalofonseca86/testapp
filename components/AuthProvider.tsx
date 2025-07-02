@@ -473,6 +473,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             console.log(
               `✅ UTILIZADOR DINÂMICO ${dynamicUser.name.toUpperCase()} LOGIN SUCESSO COM BACKUP MÚLTIPLO`,
             );
+
+            // Inicializar notificações para o usuário dinâmico logado
+            try {
+              import("@/lib/notifications").then(({ notificationService }) => {
+                notificationService
+                  .getRegistrationToken(dynamicUser.id)
+                  .then((token) => {
+                    if (token) {
+                      console.log(
+                        "🔔 Token de notificações obtido para:",
+                        dynamicUser.name,
+                      );
+                    }
+                  })
+                  .catch((error) => {
+                    console.warn(
+                      "⚠️ Erro ao obter token de notificações:",
+                      error,
+                    );
+                  });
+              });
+            } catch (notificationError) {
+              console.warn(
+                "⚠️ Erro ao inicializar notificações:",
+                notificationError,
+              );
+            }
+
             setIsLoading(false);
             return true;
           }
