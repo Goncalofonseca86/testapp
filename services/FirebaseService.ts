@@ -341,6 +341,7 @@ export class FirebaseService {
     const newWork: Work = {
       ...workData,
       assignedUsers: workData.assignedUsers || [], // GARANTIR que assignedUsers seja preservado
+      createdBy: createdBy || workData.createdBy, // Incluir quem criou a obra
       id: crypto.randomUUID(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
