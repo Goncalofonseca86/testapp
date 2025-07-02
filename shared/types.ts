@@ -52,6 +52,7 @@ export interface Work {
   observations: string;
   workPerformed: string; // Trabalho realizado
   workSheetCompleted: boolean; // Se a folha de obra foi preenchida/feita
+  createdBy?: string; // ID ou email do utilizador que criou a obra
   createdAt: string;
   updatedAt: string;
 }
