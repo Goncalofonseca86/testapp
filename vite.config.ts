@@ -23,10 +23,10 @@ export default defineConfig(({ mode }) => ({
   },
 }));
 
-function expressPlugin(): Plugin {
+function staticServePlugin(): Plugin {
   return {
-    name: "express-plugin",
-    apply: "serve", // Only apply during development (serve mode)
+    name: "static-serve-plugin",
+    apply: "serve",
     configureServer(server) {
       const app = createServer();
 
