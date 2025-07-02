@@ -11,6 +11,13 @@ import { Layout } from "./components/Layout";
 import { Toaster } from "./components/ui/toaster";
 import { WorkNotifications } from "./components/WorkNotifications";
 
+// Initialize notification service
+import("./lib/notifications")
+  .then(({ notificationService }) => {
+    console.log("🔔 Serviço de notificações inicializado");
+  })
+  .catch(console.warn);
+
 // Pages
 import { Login } from "./pages/Login";
 import { Dashboard } from "./pages/Dashboard";
