@@ -30,7 +30,7 @@
     <!-- PWA Manifest -->
     <link
       rel="manifest"
-      href="/manifest.json?v=2.0.1"
+      href="/leirisonda-deploy/manifest.json?v=2.0.1"
       crossorigin="use-credentials"
     />
 
@@ -63,15 +63,31 @@
     />
 
     <!-- Favicon e ícones adicionais com logo da Leirisonda -->
-    <link rel="icon" href="/favicon.ico" />
-    <link rel="icon" type="image/svg+xml" href="/favicon-leirisonda.svg" />
-    <link rel="shortcut icon" href="/favicon-leirisonda.svg" />
+    <link rel="icon" href="/leirisonda-deploy/favicon.ico" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="/leirisonda-deploy/favicon-leirisonda.svg"
+    />
+    <link
+      rel="shortcut icon"
+      href="/leirisonda-deploy/favicon-leirisonda.svg"
+    />
 
     <!-- PWA Styles -->
-    <link rel="stylesheet" href="/pwa-style.css" />
+    <link rel="stylesheet" href="/leirisonda-deploy/pwa-style.css" />
 
     <title>Leirisonda - Gestão de Obras</title>
-    <script type="module" src="/main.tsx"></script>
+    <script
+      type="module"
+      crossorigin
+      src="/leirisonda-deploy/assets/index-DnEsHg1H.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      crossorigin
+      href="/leirisonda-deploy/assets/index-DFdR-byQ.css"
+    />
   </head>
 
   <body>
@@ -103,7 +119,7 @@
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", function () {
           navigator.serviceWorker
-            .register("/sw.js")
+            .register("/leirisonda-deploy/sw.js")
             .then(function (registration) {
               console.log("✅ Leirisonda SW registered:", registration.scope);
             })
