@@ -105,21 +105,52 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
 
   if (!user) {
-    // VERIFICAÇÃO ADICIONAL: Tentar recuperar utilizador do localStorage
+    // VERIFICAÇÃO EXPANDIDA: Múltiplas tentativas de recuperação antes de redirecionar
     try {
       const storedUser = localStorage.getItem("leirisonda_user");
-      if (storedUser) {
-        console.log(
-          "🔄 Utilizador encontrado no localStorage mas não no contexto, recarregando...",
-        );
-        // Dar tempo ao AuthProvider para carregar o utilizador
-        setTimeout(() => {
-          if (!authData.user) {
-            window.location.reload();
-          }
-        }, 1000);
+      const sessionUser = sessionStorage.getItem("temp_user_session");
+      const justCreated = sessionStorage.getItem("just_created_work");
 
-        // Mostrar loading enquanto espera
+      // Se há qualquer indicação de sessão válida
+      if (storedUser || sessionUser || justCreated === "true") {
+        console.log(
+          "🔄 Sessão detectada mas não carregada no contexto, aguardando...",
+        );
+
+        // Dar mais tempo ao AuthProvider para carregar
+        const [waitTime, setWaitTime] = React.useState(0);
+
+        React.useEffect(() => {
+          const timer = setInterval(() => {
+            setWaitTime((prev) => prev + 1);
+          }, 1000);
+
+          // Verificar periodicamente se o usuário foi carregado
+          const checkUser = setInterval(() => {
+            if (authData.user) {
+              clearInterval(checkUser);
+              clearInterval(timer);
+            }
+          }, 500);
+
+          // Após 5 segundos, tentar recarregar se ainda não há usuário
+          const reloadTimer = setTimeout(() => {
+            if (!authData.user && waitTime >= 5) {
+              console.log(
+                "🔄 Forçando recarregamento após timeout de recuperação",
+              );
+              window.location.reload();
+            }
+          }, 5000);
+
+          return () => {
+            clearInterval(timer);
+            clearInterval(checkUser);
+            clearTimeout(reloadTimer);
+          };
+        }, [waitTime]);
+
+        // Mostrar loading com feedback mais informativo
         return (
           <div className="min-h-screen bg-gradient-to-br from-leirisonda-blue-light to-white flex items-center justify-center">
             <div className="text-center">
@@ -127,15 +158,24 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
               <p className="text-leirisonda-text-muted">
                 A recuperar sessão...
               </p>
+              <p className="text-xs text-gray-400 mt-2">
+                {waitTime < 3
+                  ? "A carregar dados do utilizador..."
+                  : waitTime < 5
+                    ? "A sincronizar com o servidor..."
+                    : "Se demorar muito, será redirecionado automaticamente..."}
+              </p>
             </div>
           </div>
         );
       }
     } catch (error) {
-      console.error("Erro ao verificar localStorage:", error);
+      console.error("Erro ao verificar estado de sessão:", error);
     }
 
-    console.log("🔒 Utilizador não autenticado, redirecionando para login");
+    console.log(
+      "🔒 Nenhuma sessão válida encontrada, redirecionando para login",
+    );
     return <Navigate to="/login" replace />;
   }
 
