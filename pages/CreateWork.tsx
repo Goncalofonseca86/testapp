@@ -232,7 +232,29 @@ export function CreateWork() {
         }
 
         try {
-          console.log("��� PREPARANDO DADOS DA OBRA...");
+          console.log("🏗️ PREPARANDO DADOS DA OBRA...");
+
+          // LOGGING ESPECÍFICO para rastrear problema do Gonçalo
+          localStorage.setItem(
+            "last_work_operation",
+            `create_work_started_${new Date().toISOString()}`,
+          );
+          localStorage.setItem(
+            "work_creation_debug",
+            JSON.stringify({
+              user: user?.email,
+              timestamp: new Date().toISOString(),
+              formData: {
+                clientName: formData.clientName,
+                workSheetNumber: formData.workSheetNumber,
+                assignedUsers: formData.assignedUsers,
+              },
+              sessionStatus: {
+                localStorage: !!localStorage.getItem("leirisonda_user"),
+                sessionStorage: !!sessionStorage.getItem("temp_user_session"),
+              },
+            }),
+          );
 
           // Prepare work data - GARANTIR que assignedUsers seja preservado
           const workData = {
