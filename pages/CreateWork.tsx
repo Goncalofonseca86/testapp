@@ -367,56 +367,51 @@ export function CreateWork() {
           );
           localStorage.setItem("last_created_work_id", workId);
 
-          // MARCAR que obra foi criada para ProtectedRoute saber
-          sessionStorage.setItem("just_created_work", "true");
+          // PRESERVAÇÃO CRÍTICA DE SESSÃO ANTES DE QUALQUER NAVEGAÇÃO
+          const currentUserData = user;
+          if (currentUserData) {
+            console.log("🛡️ PRESERVANDO SESSÃO ANTES DE NAVEGAÇÃO...");
 
-          // PRESERVAÇÃO AVANÇADA DE SESSÃO - Múltiplos backups
-          try {
-            const currentUserData = user;
-            if (currentUserData) {
-              // Backup 1: LocalStorage principal
+            // ESTRATÉGIA 1: Múltiplos backups locais
+            localStorage.setItem(
+              "leirisonda_user",
+              JSON.stringify(currentUserData),
+            );
+            sessionStorage.setItem(
+              "temp_user_session",
+              JSON.stringify(currentUserData),
+            );
+            localStorage.setItem(
+              `user_backup_${currentUserData.id}`,
+              JSON.stringify(currentUserData),
+            );
+            localStorage.setItem("leirisonda_last_user", currentUserData.email);
+            localStorage.setItem("session_timestamp", new Date().toISOString());
+
+            // ESTRATÉGIA 2: Flags específicas de criação de obra
+            sessionStorage.setItem("just_created_work", "true");
+            localStorage.setItem(
+              "work_created_timestamp",
+              new Date().toISOString(),
+            );
+            localStorage.setItem("session_preserved", "true");
+
+            // ESTRATÉGIA 3: Backup redundante com delay
+            setTimeout(() => {
               localStorage.setItem(
                 "leirisonda_user",
                 JSON.stringify(currentUserData),
               );
-
-              // Backup 2: SessionStorage temporário
               sessionStorage.setItem(
                 "temp_user_session",
                 JSON.stringify(currentUserData),
               );
+            }, 100);
 
-              // Backup 3: Backup específico do usuário
-              localStorage.setItem(
-                `user_backup_${currentUserData.id}`,
-                JSON.stringify(currentUserData),
-              );
-
-              // Backup 4: Último usuário conhecido
-              localStorage.setItem(
-                "leirisonda_last_user",
-                currentUserData.email,
-              );
-
-              // Backup 5: Timestamp de sessão
-              localStorage.setItem(
-                "session_timestamp",
-                new Date().toISOString(),
-              );
-
-              // Backup 6: Flag de obra criada
-              localStorage.setItem(
-                "work_created_timestamp",
-                new Date().toISOString(),
-              );
-
-              console.log("🛡️ SESSÃO PRESERVADA COM 6 BACKUPS DIFERENTES");
-            }
-          } catch (sessionError) {
-            console.warn("⚠️ Erro ao preservar sessão múltipla:", sessionError);
+            console.log("✅ SESSÃO PRESERVADA COM MÚLTIPLAS ESTRATÉGIAS");
           }
 
-          // SUCESSO GARANTIDO - eliminar verificações complexas que podem falhar
+          // SUCESSO GARANTIDO - mostrar feedback positivo
           console.log("🎉 OBRA CRIADA COM SUCESSO - FINALIZANDO PROCESSO");
 
           // Reset form para estado inicial
@@ -443,66 +438,33 @@ export function CreateWork() {
 
           console.log("✅ PROCESSO CONCLUÍDO - REDIRECIONANDO...");
 
-          // GARANTIR PRESERVAÇÃO DA SESSÃO antes de navegar
+          // NAVEGAÇÃO MAIS SUAVE E ROBUSTA
           try {
-            const currentUser = user;
-            if (currentUser) {
-              // Múltiplos backups da sessão antes de navegar
-              localStorage.setItem(
-                "leirisonda_user",
-                JSON.stringify(currentUser),
-              );
-              sessionStorage.setItem(
-                "temp_user_session",
-                JSON.stringify(currentUser),
-              );
-              localStorage.setItem(
-                "user_backup_" + currentUser.id,
-                JSON.stringify(currentUser),
-              );
-              localStorage.setItem("session_preserved", "true");
+            console.log("🏠 Navegando para Dashboard após obra criada");
 
-              console.log("🛡️ SESSÃO PRESERVADA ANTES DA NAVEGAÇÃO");
-            }
-          } catch (sessionError) {
-            console.warn("⚠️ Erro ao preservar sessão:", sessionError);
-          }
-
-          // Navegação ROBUSTA para Dashboard após guardar obra
-          setTimeout(() => {
-            try {
-              console.log("🏠 Navegando para Dashboard após obra criada");
-
-              // PRIMEIRO: Tentar navigate do React Router (mais suave)
+            // Dar tempo para a sessão ser totalmente preservada
+            setTimeout(() => {
+              // Usar replace para evitar histórico de navegação problemático
               navigate("/dashboard", { replace: true });
 
-              // VERIFICAÇÃO: Se após 2 segundos ainda está na mesma página, forçar navegação
+              // Verificação de segurança mais rápida
               setTimeout(() => {
                 if (window.location.pathname.includes("/create-work")) {
                   console.warn(
-                    "🔄 Navigate não funcionou, usando window.location...",
+                    "🔄 Navigate demorou, tentando window.location...",
                   );
                   window.location.href = "/dashboard";
                 }
-              }, 2000);
-            } catch (navError) {
-              console.warn("❌ React Router navigate falhou:", navError);
+              }, 1500);
+            }, 500); // Reduzir delay inicial
+          } catch (navError) {
+            console.warn("❌ Erro na navegação, usando fallback:", navError);
 
-              // FALLBACK: Usar window.location diretamente
-              try {
-                window.location.href = "/dashboard";
-              } catch (locationError) {
-                console.error("❌ window.location falhou:", locationError);
-
-                // ÚLTIMO RECURSO: Recarregar (irá para home/dashboard)
-                try {
-                  window.location.reload();
-                } catch (reloadError) {
-                  console.error("❌ Até reload falhou:", reloadError);
-                }
-              }
-            }
-          }, 1000); // Dar mais tempo para que tudo seja processado
+            // FALLBACK: Usar window.location diretamente
+            setTimeout(() => {
+              window.location.href = "/dashboard";
+            }, 500);
+          }
         } catch (err) {
           console.error("❌ ERRO AO CRIAR OBRA:", err);
 

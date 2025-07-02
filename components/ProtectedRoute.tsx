@@ -20,25 +20,88 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, isLoading, isInitialized } = authData;
 
   // VERIFICAÇÃO CRÍTICA: Se acabou de criar uma obra, NÃO redirecionar para login
-  const justCreatedWork = React.useMemo(() => {
+  const [justCreatedWork, setJustCreatedWork] = React.useState(false);
+  const [isRecoveringFromWorkCreation, setIsRecoveringFromWorkCreation] =
+    React.useState(false);
+
+  // Detectar se acabou de criar obra na inicialização
+  React.useEffect(() => {
     try {
       const flag = sessionStorage.getItem("just_created_work");
-      if (flag === "true") {
+      const workTimestamp = localStorage.getItem("work_created_timestamp");
+
+      if (flag === "true" || workTimestamp) {
         console.log("🎯 OBRA ACABADA DE CRIAR - PROTEGENDO SESSÃO");
-        // Limpar flag após usar
-        sessionStorage.removeItem("just_created_work");
-        return true;
+        setJustCreatedWork(true);
+        setIsRecoveringFromWorkCreation(true);
+
+        // Não remover a flag imediatamente - manter por mais tempo
+        // sessionStorage.removeItem("just_created_work");
       }
-      return false;
-    } catch {
-      return false;
+    } catch (error) {
+      console.warn("Erro ao verificar flag de criação de obra:", error);
     }
   }, []);
 
-  // Show loading while auth is initializing or processing
+  // Se acabou de criar obra, tentar forçar recuperação da sessão
+  React.useEffect(() => {
+    if (justCreatedWork && !user && !isLoading) {
+      console.log("🔄 FORÇANDO RECUPERAÇÃO DE SESSÃO PÓS-OBRA");
+
+      const forceRecovery = () => {
+        try {
+          // Tentar diferentes estratégias de recuperação
+          const storedUser = localStorage.getItem("leirisonda_user");
+          const sessionUser = sessionStorage.getItem("temp_user_session");
+
+          if (storedUser || sessionUser) {
+            console.log("🔄 Tentando recuperar sessão, recarregando página...");
+            // Dar um pouco mais de tempo para o AuthProvider processar
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
+          } else {
+            // Buscar backup por ID
+            for (let i = 0; i < localStorage.length; i++) {
+              const key = localStorage.key(i);
+              if (key && key.startsWith("user_backup_")) {
+                console.log("🔄 Backup encontrado, recarregando...");
+                setTimeout(() => {
+                  window.location.reload();
+                }, 1000);
+                return;
+              }
+            }
+
+            console.log("❌ Nenhuma sessão encontrada para recuperar");
+            setIsRecoveringFromWorkCreation(false);
+            setJustCreatedWork(false);
+            // Limpar flags problemáticas
+            sessionStorage.removeItem("just_created_work");
+            localStorage.removeItem("work_created_timestamp");
+          }
+        } catch (error) {
+          console.error("Erro na recuperação forçada:", error);
+          setIsRecoveringFromWorkCreation(false);
+          setJustCreatedWork(false);
+        }
+      };
+
+      // Dar um tempo para o AuthProvider tentar primeiro
+      const recoveryTimer = setTimeout(forceRecovery, 3000);
+
+      return () => clearTimeout(recoveryTimer);
+    }
+  }, [justCreatedWork, user, isLoading]);
+
   // Timeout de segurança mais conservador para evitar redirects desnecessários
   React.useEffect(() => {
-    if (!isInitialized && !isLoading && !justCreatedWork) {
+    if (
+      !isInitialized &&
+      !isLoading &&
+      !justCreatedWork &&
+      !isRecoveringFromWorkCreation
+    ) {
       const timeout = setTimeout(() => {
         console.warn(
           "⚠️ Auth inicialização demorou muito, verificando estado...",
@@ -78,32 +141,46 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
           // Em caso de erro, ser conservador e recarregar em vez de redirecionar
           window.location.reload();
         }
-      }, 12000); // Aumentado para 12 segundos para dar mais tempo ao Firebase
+      }, 15000); // Aumentado para 15 segundos para dar mais tempo
 
       return () => clearTimeout(timeout);
     }
-  }, [isInitialized, isLoading, justCreatedWork]);
+  }, [isInitialized, isLoading, justCreatedWork, isRecoveringFromWorkCreation]);
 
   // PROTEÇÃO ESPECIAL: Se acabou de criar obra, forçar que mostre conteúdo mesmo que user seja null momentaneamente
-  if (justCreatedWork) {
-    console.log("🛡️ PROTEÇÃO ATIVA: Mostrando conteúdo pós-criação de obra");
+  if (justCreatedWork && !user) {
+    console.log(
+      "🛡️ PROTEÇÃO ATIVA: Tentando recuperar sessão pós-criação de obra",
+    );
 
-    // Cleanup após um tempo para evitar que a flag permaneça indefinidamente
+    // Cleanup após um tempo mais longo para dar oportunidade de recuperação
     React.useEffect(() => {
       const cleanupTimer = setTimeout(() => {
         try {
+          console.log("🧹 Limpando flags de criação de obra após timeout");
           sessionStorage.removeItem("just_created_work");
           localStorage.removeItem("work_created_timestamp");
-          console.log("🧹 Flags de criação de obra limpas automaticamente");
+          setJustCreatedWork(false);
+          setIsRecoveringFromWorkCreation(false);
         } catch (error) {
           console.warn("Erro ao limpar flags:", error);
         }
-      }, 10000); // 10 segundos após carregamento
+      }, 20000); // 20 segundos para dar bastante tempo
 
       return () => clearTimeout(cleanupTimer);
     }, []);
 
-    return <>{children}</>;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-leirisonda-blue-light to-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-leirisonda-primary mx-auto mb-4"></div>
+          <p className="text-leirisonda-text-muted">
+            Obra guardada com sucesso!
+          </p>
+          <p className="text-xs text-gray-400 mt-2">A recuperar sessão...</p>
+        </div>
+      </div>
+    );
   }
 
   if (isLoading || !isInitialized) {
