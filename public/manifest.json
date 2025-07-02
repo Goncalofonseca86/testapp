@@ -58,6 +58,7 @@
   ],
   "categories": ["business", "productivity", "utilities"],
   "lang": "pt-PT",
+  "permissions": ["notifications"],
   "shortcuts": [
     {
       "name": "Dashboard",
