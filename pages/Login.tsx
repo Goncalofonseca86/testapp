@@ -300,7 +300,7 @@ export function Login() {
               style={{
                 width: "100%",
                 height: "48px",
-                background: isSubmitting ? "#9ca3af" : "#2563eb",
+                background: isSubmitting ? "#9ca3af" : "#22c55e",
                 color: "white",
                 border: "none",
                 borderRadius: "8px",
