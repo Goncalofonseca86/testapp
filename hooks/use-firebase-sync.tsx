@@ -164,7 +164,7 @@ export function useFirebaseSync() {
         }
 
         if (!isFirebaseAvailable) {
-          throw new Error("Firebase indisponível");
+          throw new Error("Firebase indispon��vel");
         }
 
         // 2. Sincronização em etapas com timeout
@@ -498,12 +498,15 @@ export function useFirebaseSync() {
     async (
       workData: Omit<Work, "id" | "createdAt" | "updatedAt">,
     ): Promise<string> => {
+      // Incluir informação de quem criou a obra
+      const createdBy = user?.id || user?.email || "unknown";
+
       return withInstantSync(
-        () => firebaseService.createWork(workData),
+        () => firebaseService.createWork(workData, createdBy),
         "create_work",
       );
     },
-    [withInstantSync],
+    [withInstantSync, user],
   );
 
   const createMaintenance = useCallback(
