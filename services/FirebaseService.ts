@@ -512,6 +512,37 @@ export class FirebaseService {
 
       // STATUS FINAL - Sempre positivo para evitar erros
       console.log("🌟 OBRA CRIADA COM SUCESSO:", newWork.id);
+
+      // NOTIFICAR OUTRAS ABAS/DISPOSITIVOS SOBRE NOVA OBRA
+      try {
+        const syncEvent = {
+          type: "new_work_created",
+          workId: newWork.id,
+          clientName: newWork.clientName,
+          timestamp: new Date().toISOString(),
+          device: navigator.userAgent.substring(0, 50),
+        };
+
+        localStorage.setItem(
+          "leirisonda_last_sync_event",
+          JSON.stringify(syncEvent),
+        );
+
+        // Disparar evento customizado para outras abas
+        window.dispatchEvent(
+          new CustomEvent("leirisonda_new_work", {
+            detail: syncEvent,
+          }),
+        );
+
+        console.log("📡 EVENTO DE SINCRONIZAÇÃO DISPARADO PARA OUTRAS ABAS");
+      } catch (eventError) {
+        console.warn(
+          "⚠️ Erro ao disparar evento de sincronização:",
+          eventError,
+        );
+      }
+
       if (this.isFirebaseAvailable) {
         console.log("📡 SINCRONIZAÇÃO FIREBASE EM PROGRESSO EM BACKGROUND");
       } else {
