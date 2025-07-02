@@ -5,6 +5,8 @@ import { createServer } from "./server";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  root: "./leirisonda-deploy",
+  publicDir: "./leirisonda-deploy",
   server: {
     host: "::",
     port: 8080,
@@ -12,19 +14,19 @@ export default defineConfig(({ mode }) => ({
   build: {
     outDir: "dist/spa",
   },
-  plugins: [react(), expressPlugin()],
+  plugins: [staticServePlugin()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./client"),
+      "@": path.resolve(__dirname, "./"),
       "@shared": path.resolve(__dirname, "./shared"),
     },
   },
 }));
 
-function expressPlugin(): Plugin {
+function staticServePlugin(): Plugin {
   return {
-    name: "express-plugin",
-    apply: "serve", // Only apply during development (serve mode)
+    name: "static-serve-plugin",
+    apply: "serve",
     configureServer(server) {
       const app = createServer();
 
