@@ -52,7 +52,7 @@ export function Login() {
         style={{
           minHeight: "100vh",
           background:
-            "linear-gradient(135deg, rgb(97, 165, 214) 0%, rgb(0, 119, 132) 100%)",
+            "linear-gradient(135deg, rgb(34, 197, 94) 0%, rgb(21, 128, 61) 100%)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -117,7 +117,7 @@ export function Login() {
       style={{
         minHeight: "100vh",
         background:
-          "linear-gradient(135deg, rgb(97, 165, 214) 0%, rgb(0, 119, 132) 100%)",
+          "linear-gradient(135deg, rgb(34, 197, 94) 0%, rgb(21, 128, 61) 100%)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -139,7 +139,7 @@ export function Login() {
         {/* Header */}
         <div
           style={{
-            background: "linear-gradient(135deg, #2563eb, #0891b2)",
+            background: "linear-gradient(135deg, #22c55e, #15803d)",
             padding: "32px",
             textAlign: "center",
             color: "white",
@@ -300,7 +300,7 @@ export function Login() {
               style={{
                 width: "100%",
                 height: "48px",
-                background: isSubmitting ? "#9ca3af" : "#2563eb",
+                background: isSubmitting ? "#9ca3af" : "#22c55e",
                 color: "white",
                 border: "none",
                 borderRadius: "8px",
