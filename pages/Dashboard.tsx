@@ -348,6 +348,11 @@ export function Dashboard() {
         </div>
       </div>
 
+      {/* Notification Setup */}
+      <div className="px-4 pt-6">
+        <NotificationSetup />
+      </div>
+
       {/* Stats Cards */}
       <div className="px-4 py-6 space-y-4">
         <Link
