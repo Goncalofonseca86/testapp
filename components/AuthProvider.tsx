@@ -95,42 +95,107 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (!mounted) return;
 
-        // Tentar carregar utilizador armazenado com tratamento defensivo
+        // MÚLTIPLAS TENTATIVAS DE RECUPERAÇÃO DE SESSÃO
+        let recoveredUser = null;
+
+        // Tentativa 1: localStorage principal
         try {
           const stored = localStorage.getItem("leirisonda_user");
-          if (stored && mounted) {
+          if (stored) {
             const parsedUser = JSON.parse(stored);
-
-            // Validar se o objeto tem as propriedades essenciais
             if (parsedUser && parsedUser.email && parsedUser.name) {
-              console.log("👤 UTILIZADOR CARREGADO:", parsedUser.email);
-              setUser(parsedUser);
-            } else {
-              console.warn("⚠️ Dados de utilizador inválidos, a limpar...");
-              localStorage.removeItem("leirisonda_user");
+              console.log(
+                "👤 UTILIZADOR CARREGADO (principal):",
+                parsedUser.email,
+              );
+              recoveredUser = parsedUser;
             }
           }
         } catch (parseError) {
-          console.error(
-            "❌ Erro ao fazer parse de utilizador, a limpar dados:",
-            parseError,
-          );
+          console.warn("⚠️ Erro parse principal, tentando backup...");
+        }
+
+        // Tentativa 2: Backup de último utilizador
+        if (!recoveredUser) {
           try {
-            localStorage.removeItem("leirisonda_user");
-          } catch (clearError) {
-            console.error("❌ Erro ao limpar dados de utilizador:", clearError);
+            const lastUserEmail = localStorage.getItem("leirisonda_last_user");
+            if (lastUserEmail) {
+              console.log(
+                "🔄 Tentando recuperar último utilizador:",
+                lastUserEmail,
+              );
+
+              // Verificar se é utilizador global
+              const globalUser = Object.values(globalUsers).find(
+                (u) => u.email.toLowerCase() === lastUserEmail.toLowerCase(),
+              );
+
+              if (globalUser) {
+                const loginUser: User = {
+                  id: globalUser.id,
+                  email: globalUser.email,
+                  name: globalUser.name,
+                  role: globalUser.role,
+                  permissions: globalUser.permissions,
+                  createdAt: new Date().toISOString(),
+                };
+                recoveredUser = loginUser;
+                console.log(
+                  "✅ Utilizador global recuperado:",
+                  globalUser.name,
+                );
+              }
+            }
+          } catch (backupError) {
+            console.warn("⚠️ Erro ao recuperar backup:", backupError);
           }
+        }
+
+        // Tentativa 3: Verificar se há obra acabada de criar (manter sessão)
+        if (!recoveredUser) {
+          try {
+            const justCreatedWork = sessionStorage.getItem("just_created_work");
+            const sessionUser = sessionStorage.getItem("temp_user_session");
+
+            if (justCreatedWork === "true" && sessionUser) {
+              const tempUser = JSON.parse(sessionUser);
+              if (tempUser && tempUser.email && tempUser.name) {
+                console.log(
+                  "🛡️ Recuperando sessão pós-criação de obra:",
+                  tempUser.email,
+                );
+                recoveredUser = tempUser;
+              }
+            }
+          } catch (sessionError) {
+            console.warn(
+              "⚠️ Erro ao recuperar sessão temporária:",
+              sessionError,
+            );
+          }
+        }
+
+        // Aplicar utilizador recuperado
+        if (recoveredUser && mounted) {
+          setUser(recoveredUser);
+
+          // Garantir que está salvo corretamente
+          localStorage.setItem(
+            "leirisonda_user",
+            JSON.stringify(recoveredUser),
+          );
+          sessionStorage.setItem(
+            "temp_user_session",
+            JSON.stringify(recoveredUser),
+          );
+
+          console.log("✅ SESSÃO RECUPERADA COM SUCESSO:", recoveredUser.email);
+        } else if (mounted) {
+          console.log("📝 Nenhuma sessão válida encontrada");
         }
       } catch (error) {
         console.error("❌ Erro na inicialização auth:", error);
         // Não quebrar, continuar com user = null
-        // Tentar limpar dados corrompidos
-        try {
-          localStorage.removeItem("leirisonda_user");
-          localStorage.removeItem("leirisonda_last_user");
-        } catch (clearError) {
-          console.error("❌ Erro ao limpar dados após falha:", clearError);
-        }
       } finally {
         if (mounted) {
           setIsInitialized(true);
