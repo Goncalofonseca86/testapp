@@ -321,6 +321,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           );
 
           console.log("✅ SESSÃO RECUPERADA COM SUCESSO:", recoveredUser.email);
+
+          // Se foi uma recuperação pós-criação de obra, limpar flags após um tempo
+          const justCreatedWork = sessionStorage.getItem("just_created_work");
+          const workCreatedTimestamp = localStorage.getItem(
+            "work_created_timestamp",
+          );
+
+          if (justCreatedWork === "true" || workCreatedTimestamp) {
+            console.log(
+              "🧹 Programando limpeza de flags de criação de obra...",
+            );
+            setTimeout(() => {
+              try {
+                sessionStorage.removeItem("just_created_work");
+                localStorage.removeItem("work_created_timestamp");
+                localStorage.removeItem("session_preserved");
+                console.log(
+                  "✅ Flags de criação de obra limpas automaticamente",
+                );
+              } catch (cleanupError) {
+                console.warn("Erro ao limpar flags:", cleanupError);
+              }
+            }, 5000); // 5 segundos após recuperação bem-sucedida
+          }
         } else if (mounted) {
           console.log("📝 Nenhuma sessão válida encontrada");
         }
