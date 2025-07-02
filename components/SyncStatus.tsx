@@ -152,6 +152,9 @@ export function SyncStatus({
           {isSyncing && (
             <RefreshCw className="w-4 h-4 animate-spin text-blue-600" />
           )}
+          <Badge variant="secondary" className="text-xs">
+            🔔 Notificações ON
+          </Badge>
         </div>
 
         <div className="flex items-center gap-2">
