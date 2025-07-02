@@ -102,6 +102,10 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
+
+        {/* Sistema de Notificações e Toasts */}
+        <WorkNotifications />
+        <Toaster />
       </AuthProvider>
     </ErrorBoundary>
   );
