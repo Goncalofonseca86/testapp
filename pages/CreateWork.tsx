@@ -329,8 +329,54 @@ export function CreateWork() {
           );
           localStorage.setItem("last_created_work_id", workId);
 
-          // MARCAR que obra foi criada para ErrorBoundary saber
+          // MARCAR que obra foi criada para ProtectedRoute saber
           sessionStorage.setItem("just_created_work", "true");
+
+          // PRESERVAÇÃO AVANÇADA DE SESSÃO - Múltiplos backups
+          try {
+            const currentUserData = user;
+            if (currentUserData) {
+              // Backup 1: LocalStorage principal
+              localStorage.setItem(
+                "leirisonda_user",
+                JSON.stringify(currentUserData),
+              );
+
+              // Backup 2: SessionStorage temporário
+              sessionStorage.setItem(
+                "temp_user_session",
+                JSON.stringify(currentUserData),
+              );
+
+              // Backup 3: Backup específico do usuário
+              localStorage.setItem(
+                `user_backup_${currentUserData.id}`,
+                JSON.stringify(currentUserData),
+              );
+
+              // Backup 4: Último usuário conhecido
+              localStorage.setItem(
+                "leirisonda_last_user",
+                currentUserData.email,
+              );
+
+              // Backup 5: Timestamp de sessão
+              localStorage.setItem(
+                "session_timestamp",
+                new Date().toISOString(),
+              );
+
+              // Backup 6: Flag de obra criada
+              localStorage.setItem(
+                "work_created_timestamp",
+                new Date().toISOString(),
+              );
+
+              console.log("🛡️ SESSÃO PRESERVADA COM 6 BACKUPS DIFERENTES");
+            }
+          } catch (sessionError) {
+            console.warn("⚠️ Erro ao preservar sessão múltipla:", sessionError);
+          }
 
           // SUCESSO GARANTIDO - eliminar verificações complexas que podem falhar
           console.log("🎉 OBRA CRIADA COM SUCESSO - FINALIZANDO PROCESSO");
@@ -1047,8 +1093,9 @@ export function CreateWork() {
                   </Button>
                 </div>
                 <p className="text-sm text-blue-600 mt-2">
-                  Execute o diagnóstico se a obra não foi guardada corretamente.
-                  Isto irá verificar e corrigir problemas de salvamento.
+                  Execute o diagnóstico se a obra n��o foi guardada
+                  corretamente. Isto irá verificar e corrigir problemas de
+                  salvamento.
                 </p>
               </div>
             )}
