@@ -405,7 +405,7 @@ export class FirebaseService {
 
               firebaseSuccess = true;
               console.log(
-                "🔥 FIREBASE SYNC CONCLUÍDO EM BACKGROUND:",
+                "��� FIREBASE SYNC CONCLUÍDO EM BACKGROUND:",
                 newWork.id,
               );
 
@@ -519,6 +519,9 @@ export class FirebaseService {
           type: "new_work_created",
           workId: newWork.id,
           clientName: newWork.clientName,
+          workSheetNumber: newWork.workSheetNumber,
+          address: newWork.address,
+          createdBy: newWork.createdBy || "unknown",
           timestamp: new Date().toISOString(),
           device: navigator.userAgent.substring(0, 50),
         };
