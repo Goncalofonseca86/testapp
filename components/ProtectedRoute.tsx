@@ -36,26 +36,49 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   }, []);
 
   // Show loading while auth is initializing or processing
-  // Adicionar timeout de segurança para evitar loading infinito
+  // Timeout de segurança mais conservador para evitar redirects desnecessários
   React.useEffect(() => {
     if (!isInitialized && !isLoading && !justCreatedWork) {
       const timeout = setTimeout(() => {
-        console.warn("⚠️ Auth inicialização demorou muito, redirecionando...");
-        // VERIFICAR NOVAMENTE se há utilizador no localStorage antes de redirecionar
+        console.warn(
+          "⚠️ Auth inicialização demorou muito, verificando estado...",
+        );
+
+        // VERIFICAÇÃO MÚLTIPLA antes de redirecionar
         try {
           const storedUser = localStorage.getItem("leirisonda_user");
-          if (storedUser) {
+          const sessionUser = sessionStorage.getItem("temp_user_session");
+          const justCreated = sessionStorage.getItem("just_created_work");
+
+          // Se há qualquer indicação de usuário válido, recarregar em vez de redirecionar
+          if (storedUser || sessionUser || justCreated === "true") {
             console.log(
-              "👤 Utilizador encontrado no localStorage, recarregando página...",
+              "👤 Estado de usuário detectado, recarregando página...",
             );
             window.location.reload();
             return;
           }
+
+          // Verificar se há backup de usuário por ID
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith("user_backup_")) {
+              console.log("👤 Backup de usuário encontrado, recarregando...");
+              window.location.reload();
+              return;
+            }
+          }
+
+          console.log(
+            "🔒 Nenhum estado de usuário encontrado, redirecionando para login",
+          );
+          window.location.href = "/login";
         } catch (error) {
-          console.error("Erro ao verificar localStorage:", error);
+          console.error("Erro ao verificar estado de autenticação:", error);
+          // Em caso de erro, ser conservador e recarregar em vez de redirecionar
+          window.location.reload();
         }
-        window.location.href = "/login";
-      }, 8000); // 8 segundos timeout (mais tempo para processar Firebase)
+      }, 12000); // Aumentado para 12 segundos para dar mais tempo ao Firebase
 
       return () => clearTimeout(timeout);
     }
