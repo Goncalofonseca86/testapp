@@ -156,22 +156,81 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           try {
             const justCreatedWork = sessionStorage.getItem("just_created_work");
             const sessionUser = sessionStorage.getItem("temp_user_session");
+            const workCreatedTimestamp = localStorage.getItem(
+              "work_created_timestamp",
+            );
 
-            if (justCreatedWork === "true" && sessionUser) {
-              const tempUser = JSON.parse(sessionUser);
-              if (tempUser && tempUser.email && tempUser.name) {
-                console.log(
-                  "🛡️ Recuperando sessão pós-criação de obra:",
-                  tempUser.email,
+            if (justCreatedWork === "true" || workCreatedTimestamp) {
+              console.log(
+                "🏗️ Detectada criação de obra recente, tentando recuperar sessão...",
+              );
+
+              // Primeira opção: SessionStorage
+              if (sessionUser) {
+                const tempUser = JSON.parse(sessionUser);
+                if (tempUser && tempUser.email && tempUser.name) {
+                  console.log(
+                    "🛡️ Recuperando sessão via sessionStorage:",
+                    tempUser.email,
+                  );
+                  recoveredUser = tempUser;
+                }
+              }
+
+              // Segunda opção: Backup por ID de usuário
+              if (!recoveredUser) {
+                for (let i = 0; i < localStorage.length; i++) {
+                  const key = localStorage.key(i);
+                  if (key && key.startsWith("user_backup_")) {
+                    try {
+                      const backupUser = JSON.parse(
+                        localStorage.getItem(key) || "",
+                      );
+                      if (backupUser && backupUser.email && backupUser.name) {
+                        console.log(
+                          "🛡️ Recuperando sessão via backup:",
+                          backupUser.email,
+                        );
+                        recoveredUser = backupUser;
+                        break;
+                      }
+                    } catch (error) {
+                      console.warn("Erro ao processar backup:", key);
+                    }
+                  }
+                }
+              }
+
+              // Terceira opção: Último usuário conhecido
+              if (!recoveredUser) {
+                const lastUserEmail = localStorage.getItem(
+                  "leirisonda_last_user",
                 );
-                recoveredUser = tempUser;
+                if (lastUserEmail) {
+                  const globalUser = Object.values(globalUsers).find(
+                    (u) =>
+                      u.email.toLowerCase() === lastUserEmail.toLowerCase(),
+                  );
+                  if (globalUser) {
+                    const loginUser: User = {
+                      id: globalUser.id,
+                      email: globalUser.email,
+                      name: globalUser.name,
+                      role: globalUser.role,
+                      permissions: globalUser.permissions,
+                      createdAt: new Date().toISOString(),
+                    };
+                    recoveredUser = loginUser;
+                    console.log(
+                      "🛡️ Recuperando sessão via último usuário:",
+                      globalUser.name,
+                    );
+                  }
+                }
               }
             }
           } catch (sessionError) {
-            console.warn(
-              "⚠️ Erro ao recuperar sessão temporária:",
-              sessionError,
-            );
+            console.warn("⚠️ Erro ao recuperar sessão pós-obra:", sessionError);
           }
         }
 
@@ -345,6 +404,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log(
           `✅ ${globalUser.name.toUpperCase()} LOGIN SUCESSO COM BACKUP MÚLTIPLO`,
         );
+
+        // Inicializar notificações para o usuário logado
+        try {
+          import("@/lib/notifications").then(({ notificationService }) => {
+            notificationService
+              .getRegistrationToken(loginUser.id)
+              .then((token) => {
+                if (token) {
+                  console.log(
+                    "🔔 Token de notificações obtido para:",
+                    globalUser.name,
+                  );
+                }
+              })
+              .catch((error) => {
+                console.warn("⚠️ Erro ao obter token de notificações:", error);
+              });
+          });
+        } catch (notificationError) {
+          console.warn(
+            "⚠️ Erro ao inicializar notificações:",
+            notificationError,
+          );
+        }
+
         setIsLoading(false);
         return true;
       }
@@ -389,6 +473,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             console.log(
               `✅ UTILIZADOR DINÂMICO ${dynamicUser.name.toUpperCase()} LOGIN SUCESSO COM BACKUP MÚLTIPLO`,
             );
+
+            // Inicializar notificações para o usuário dinâmico logado
+            try {
+              import("@/lib/notifications").then(({ notificationService }) => {
+                notificationService
+                  .getRegistrationToken(dynamicUser.id)
+                  .then((token) => {
+                    if (token) {
+                      console.log(
+                        "🔔 Token de notificações obtido para:",
+                        dynamicUser.name,
+                      );
+                    }
+                  })
+                  .catch((error) => {
+                    console.warn(
+                      "⚠️ Erro ao obter token de notificações:",
+                      error,
+                    );
+                  });
+              });
+            } catch (notificationError) {
+              console.warn(
+                "⚠️ Erro ao inicializar notificações:",
+                notificationError,
+              );
+            }
+
             setIsLoading(false);
             return true;
           }

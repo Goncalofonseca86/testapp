@@ -23,6 +23,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { useFirebaseSync } from "@/hooks/use-firebase-sync";
 import { SyncStatus } from "@/components/SyncStatus";
+import { NotificationSetup } from "@/components/NotificationSetup";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 
@@ -345,6 +346,11 @@ export function Dashboard() {
             {format(new Date(), "EEEE, dd 'de' MMMM", { locale: pt })}
           </p>
         </div>
+      </div>
+
+      {/* Notification Setup */}
+      <div className="px-4 pt-6">
+        <NotificationSetup />
       </div>
 
       {/* Stats Cards */}
