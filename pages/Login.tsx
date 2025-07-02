@@ -139,7 +139,7 @@ export function Login() {
         {/* Header */}
         <div
           style={{
-            background: "linear-gradient(135deg, #2563eb, #0891b2)",
+            background: "linear-gradient(135deg, #22c55e, #15803d)",
             padding: "32px",
             textAlign: "center",
             color: "white",
