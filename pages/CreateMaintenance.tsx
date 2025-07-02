@@ -101,6 +101,46 @@ export function CreateMaintenance() {
       const maintenanceId = await createMaintenance(maintenanceData);
       console.log("✅ Manutenção criada com sucesso:", maintenanceId);
 
+      // ENVIAR NOTIFICAÇÕES PUSH para utilizadores atribuídos (se existirem)
+      try {
+        if (
+          maintenanceData.assignedUsers &&
+          maintenanceData.assignedUsers.length > 0
+        ) {
+          console.log(
+            "📤 Enviando notificações push de manutenção para utilizadores atribuídos...",
+          );
+
+          // Importar serviço de notificações dinamicamente
+          const { notificationService } = await import("@/lib/notifications");
+
+          await notificationService.sendMaintenanceNotification(
+            maintenanceData.assignedUsers,
+            {
+              clientName: maintenanceData.clientName,
+              poolLocation: maintenanceData.location,
+              type: maintenanceData.poolType,
+              createdBy: user?.id || user?.email || "unknown",
+              maintenanceId: maintenanceId,
+            },
+          );
+
+          console.log(
+            "✅ Notificações push de manutenção enviadas com sucesso",
+          );
+        } else {
+          console.log(
+            "ℹ️ Nenhum utilizador atribuído à manutenção - sem notificações a enviar",
+          );
+        }
+      } catch (notificationError) {
+        console.warn(
+          "⚠️ Erro ao enviar notificações push de manutenção (não crítico):",
+          notificationError,
+        );
+        // Não falhar a criação da manutenção por causa das notificações
+      }
+
       navigate("/pool-maintenance");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro desconhecido");
