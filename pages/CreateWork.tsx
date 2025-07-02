@@ -442,28 +442,19 @@ export function CreateWork() {
           try {
             console.log("🏠 Navegando para Dashboard após obra criada");
 
-            // Dar tempo para a sessão ser totalmente preservada
-            setTimeout(() => {
-              // Usar replace para evitar histórico de navegação problemático
-              navigate("/dashboard", { replace: true });
+            // Limpar flags problemáticas imediatamente
+            sessionStorage.removeItem("just_created_work");
+            localStorage.removeItem("work_created_timestamp");
 
-              // Verificação de segurança mais rápida
-              setTimeout(() => {
-                if (window.location.pathname.includes("/create-work")) {
-                  console.warn(
-                    "🔄 Navigate demorou, tentando window.location...",
-                  );
-                  window.location.href = "/dashboard";
-                }
-              }, 1500);
-            }, 500); // Reduzir delay inicial
+            // Usar window.location diretamente para evitar problemas de navegação
+            setTimeout(() => {
+              window.location.href = "/dashboard";
+            }, 200); // Delay muito reduzido
           } catch (navError) {
             console.warn("❌ Erro na navegação, usando fallback:", navError);
 
-            // FALLBACK: Usar window.location diretamente
-            setTimeout(() => {
-              window.location.href = "/dashboard";
-            }, 500);
+            // FALLBACK: Forçar navegação
+            window.location.href = "/dashboard";
           }
         } catch (err) {
           console.error("❌ ERRO AO CRIAR OBRA:", err);
