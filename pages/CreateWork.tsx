@@ -990,6 +990,9 @@ export function CreateWork() {
             )}
           </form>
         </div>
+
+        {/* Componente de Diagnóstico para Gonçalo */}
+        <WorkCreationDiagnostics />
       </div>
     );
   } catch (componentError) {
@@ -1019,6 +1022,9 @@ export function CreateWork() {
             </Button>
           </div>
         </div>
+
+        {/* Componente de Diagnóstico mesmo em caso de erro */}
+        <WorkCreationDiagnostics />
       </div>
     );
   }
