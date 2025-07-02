@@ -117,7 +117,7 @@ export function Login() {
       style={{
         minHeight: "100vh",
         background:
-          "linear-gradient(135deg, rgb(97, 165, 214) 0%, rgb(0, 119, 132) 100%)",
+          "linear-gradient(135deg, rgb(34, 197, 94) 0%, rgb(21, 128, 61) 100%)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
