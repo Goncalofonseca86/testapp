@@ -329,10 +329,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           createdAt: new Date().toISOString(),
         };
 
+        // MÚLTIPLOS BACKUPS DE SESSÃO PARA ROBUSTEZ
         localStorage.setItem("leirisonda_user", JSON.stringify(loginUser));
-        localStorage.setItem("leirisonda_last_user", globalUser.email); // Guardar último utilizador
+        localStorage.setItem("leirisonda_last_user", globalUser.email);
+        sessionStorage.setItem("temp_user_session", JSON.stringify(loginUser));
+        localStorage.setItem(
+          "user_backup_" + globalUser.id,
+          JSON.stringify(loginUser),
+        );
+
+        // Backup adicional com timestamp
+        localStorage.setItem("session_timestamp", new Date().toISOString());
+
         setUser(loginUser);
-        console.log(`✅ ${globalUser.name.toUpperCase()} LOGIN SUCESSO`);
+        console.log(
+          `✅ ${globalUser.name.toUpperCase()} LOGIN SUCESSO COM BACKUP MÚLTIPLO`,
+        );
         setIsLoading(false);
         return true;
       }
@@ -355,14 +367,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         for (const key of passwordKeys) {
           const storedPassword = localStorage.getItem(key);
           if (storedPassword === password) {
+            // MÚLTIPLOS BACKUPS DE SESSÃO PARA ROBUSTEZ
             localStorage.setItem(
               "leirisonda_user",
               JSON.stringify(dynamicUser),
             );
-            localStorage.setItem("leirisonda_last_user", dynamicUser.email); // Guardar último utilizador
+            localStorage.setItem("leirisonda_last_user", dynamicUser.email);
+            sessionStorage.setItem(
+              "temp_user_session",
+              JSON.stringify(dynamicUser),
+            );
+            localStorage.setItem(
+              "user_backup_" + dynamicUser.id,
+              JSON.stringify(dynamicUser),
+            );
+
+            // Backup adicional com timestamp
+            localStorage.setItem("session_timestamp", new Date().toISOString());
+
             setUser(dynamicUser);
             console.log(
-              `✅ UTILIZADOR DINÂMICO ${dynamicUser.name.toUpperCase()} LOGIN SUCESSO`,
+              `✅ UTILIZADOR DINÂMICO ${dynamicUser.name.toUpperCase()} LOGIN SUCESSO COM BACKUP MÚLTIPLO`,
             );
             setIsLoading(false);
             return true;
